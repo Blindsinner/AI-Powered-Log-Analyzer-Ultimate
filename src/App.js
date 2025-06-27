@@ -1,3 +1,5 @@
+import JSZip from 'jszip';
+window.JSZip = JSZip; // Expose to global scope for utils
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { FileText, Settings, LayoutDashboard, BrainCircuit, Search, AlertCircle, X, ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound, CheckCircle, BarChartHorizontal, Zap, Server } from 'lucide-react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Scatter, Legend } from 'recharts';
