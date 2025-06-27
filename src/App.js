@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X, ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound, Zap } from 'lucide-react';
+import { FileText, Settings, LayoutDashboard, BrainCircuit, Search, AlertCircle, X, ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound, CheckCircle, BarChartHorizontal, Zap, Server } from 'lucide-react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Scatter, Legend } from 'recharts';
 
 // --- Helper & Parsing Functions ---
@@ -175,7 +175,7 @@ const triggerDownload = (content, fileName, contentType) => {
 // --- UI Components ---
 
 const Header = () => (
-    <header className="bg-slate-900 text-white p-4 shadow-lg flex items-center justify-between z-20" style={{height: '72px'}}>
+    <header className="bg-slate-900 text-white p-4 shadow-lg flex items-center justify-between z-20">
         <div className="flex items-center">
             <TestTubeDiagonal className="w-8 h-8 mr-3 text-cyan-400" />
             <h1 className="text-xl font-bold">Log Analyzer Ultimate</h1>
@@ -201,12 +201,12 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
     const providers = {
         gemini: {
             name: "Google Gemini",
-            models: ['gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-pro'],
+            models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'],
             defaultEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
         },
         openai: {
             name: "OpenAI",
-            models: ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+            models: ['gpt-4o', 'gpt-3.5-turbo'],
             defaultEndpoint: 'https://api.openai.com/v1/chat/completions'
         }
     };
@@ -264,7 +264,7 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
                             value={tempConfig.customEndpoint} 
                             onChange={e => setTempConfig({ ...tempConfig, customEndpoint: e.target.value })}
                             className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2 font-mono"
-                            placeholder={providers[tempConfig.provider].defaultEndpoint.replace('{model}', tempConfig.model)} />
+                            placeholder={providers[tempConfig.provider].defaultEndpoint} />
                     </div>
                 </div>
 
@@ -279,31 +279,30 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
 
 const FileUploader = ({ onFileSelect, disabled, fileNames }) => (
      <div className="mb-2">
-         <label className="block text-sm font-medium text-slate-300 mb-2">Log Files</label>
-         <div className="relative">
-              <input type="file" id="logFile" multiple onChange={(e) => onFileSelect(Array.from(e.target.files))} disabled={disabled} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-              <div className="flex items-center justify-center w-full bg-slate-700 border-2 border-dashed border-slate-500 rounded-md p-4 text-center text-slate-400 hover:border-cyan-500 hover:text-cyan-400 transition min-h-[60px]">
-                 {fileNames.length > 0 ? (
-                     <div className="text-xs text-left">
-                         {fileNames.map(f => <p key={f.name} className="truncate" title={f.name}>- {f.name}</p>)}
-                     </div>
-                 ) : 'Click or Drag to Upload Files / ZIP'}
-              </div>
-         </div>
-         <div className="text-xs text-slate-500 mt-1 group relative cursor-pointer w-fit">
-            <span>Supported: .log, .txt, .zip...</span>
-             <div className="absolute hidden group-hover:block bg-slate-700 text-slate-300 p-2 rounded-md shadow-lg text-xs w-64 z-20 bottom-full mb-2">
-                 <p className="font-bold">Full list:</p>
-                 <p>.log, .txt, .text, .out, .zip, .gz, .tar, .iis, .access, .nginx, .apache, .evtx, .etl, .csv, .xml, .json, .ini, .inf, .syslog, .auth, .dmesg, .messages, .md, .config, .yml, .yaml, .sql, .py, .js, .java, .cpp, .cs</p>
-                 <p className="mt-1 text-cyan-400">*Binary formats are read as text; ZIP is extracted.</p>
+        <label className="block text-sm font-medium text-slate-300 mb-2">Log Files</label>
+        <div className="relative">
+             <input type="file" id="logFile" multiple onChange={(e) => onFileSelect(Array.from(e.target.files))} disabled={disabled} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+             <div className="flex items-center justify-center w-full bg-slate-700 border-2 border-dashed border-slate-500 rounded-md p-4 text-center text-slate-400 hover:border-cyan-500 hover:text-cyan-400 transition min-h-[60px]">
+                {fileNames.length > 0 ? (
+                    <div className="text-xs text-left">
+                        {fileNames.map(f => <p key={f.name} className="truncate">- {f.name}</p>)}
+                    </div>
+                ) : 'Click or Drag to Upload Files / ZIP'}
              </div>
-         </div>
-     </div>
+        </div>
+        <div className="text-xs text-slate-500 mt-1 group relative cursor-pointer">
+            Supported: .log, .txt, .zip, .evtx, .etl...
+            <div className="absolute hidden group-hover:block bg-slate-700 text-slate-300 p-2 rounded-md shadow-lg text-xs w-64 z-10">
+                .log, .txt, .text, .out, .zip, .gz, .tar, .iis, .access, .nginx, .apache, .evtx, .etl, .csv, .xml, .json, .ini, .inf, .syslog, .auth, .dmesg, .messages, .md, .config, .yml, .yaml, .sql, .py, .js, .java, .cpp, .cs
+                <p className="mt-1 text-cyan-400">*Binary formats are read as text; ZIP is extracted.</p>
+            </div>
+        </div>
+    </div>
 );
 
 const StatCard = ({ title, value, icon: Icon }) => (
     <div className="bg-slate-800 p-4 rounded-lg flex items-center">
-        <Icon className="w-8 h-8 mr-4 text-cyan-400 flex-shrink-0"/>
+        <Icon className="w-8 h-8 mr-4 text-cyan-400"/>
         <div><p className="text-slate-400 text-sm">{title}</p><p className="text-2xl font-bold">{value}</p></div>
     </div>
 );
@@ -313,18 +312,14 @@ const executeQuery = (query, allContexts) => {
     const whereMatch = query.match(/where\s+(.+?)(group by|order by|$)/i);
     if (!whereMatch) return allContexts.map(i => ({...i, timestamp: i.timestamp.toLocaleString()}));
     
-    const [field, operator, ...valueParts] = whereMatch[1].trim().split(/\s+/);
-    const value = valueParts.join(' ').replace(/['"]/g, '');
-
-    if (!field || !operator || value === undefined) {
-        throw new Error("Invalid WHERE clause. Expected: field operator 'value'.");
-    }
+    const [field, operator, value] = whereMatch[1].trim().split(/\s+/, 3);
+    const cleanValue = value.replace(/['"]/g, '');
 
     return allContexts
         .filter(item => {
             const itemValue = (field.toLowerCase() === 'message') ? item.line : item.sourceFile;
-            if (itemValue === undefined || itemValue === null) return false;
-            return operator.toLowerCase() === 'contains' && itemValue.toLowerCase().includes(value.toLowerCase());
+            if (!itemValue) return false;
+            return operator.toLowerCase() === 'contains' && itemValue.toLowerCase().includes(cleanValue.toLowerCase());
         })
         .map(i => ({ ...i, timestamp: i.timestamp.toLocaleString() }));
 };
@@ -338,7 +333,6 @@ const DataExplorerView = ({ allContexts }) => {
         try {
             if (allContexts.length === 0) {
                  setQueryError('No data loaded. Please run an analysis first.');
-                 setQueryResult([]);
                  return;
             }
             setQueryError('');
@@ -351,29 +345,37 @@ const DataExplorerView = ({ allContexts }) => {
     
     return (
         <div className="p-4 space-y-4">
-              <h3 className="text-xl font-bold">Data Explorer (Experimental)</h3>
-              <div className="bg-slate-800 p-4 rounded-lg space-y-3">
-                  <textarea value={query} onChange={e => setQuery(e.target.value)} className="w-full h-24 bg-slate-900 border border-slate-600 rounded-md p-2 font-mono" />
-                  <button onClick={handleRunQuery} className="bg-cyan-600 font-semibold px-4 py-2 rounded-md hover:bg-cyan-700">Run Query</button>
-                  {queryError && <p className="text-red-400 text-sm">{queryError}</p>}
-              </div>
-              <div className="bg-slate-800 p-4 rounded-lg">
-                  <h4 className="font-bold mb-2">Query Results ({queryResult.length} rows)</h4>
-                  <div className="max-h-96 overflow-auto"><table className="w-full text-sm text-left table-fixed">
-                      <thead className="bg-slate-700 sticky top-0"><tr>
-                          <th className="p-2 w-1/4">Timestamp</th><th className="p-2 w-1/4">Source</th><th className="p-2 w-[10%]">Line #</th><th className="p-2 w-[45%]">Message</th>
-                      </tr></thead>
-                      <tbody>
-                          {queryResult.length === 0 && (
-                            <tr><td colSpan="4" className="text-center p-8 text-slate-400">Run a query to see results.</td></tr>
-                          )}
-                          {queryResult.map((row, i) => (
-                          <tr key={i} className="border-b border-slate-700 hover:bg-slate-700/50">
-                              <td className="p-2 whitespace-nowrap">{row.timestamp}</td><td className="p-2 truncate" title={row.sourceFile}>{row.sourceFile}</td><td className="p-2">{row.lineNumber}</td><td className="p-2 truncate" title={row.line}>{row.line}</td>
-                          </tr>
-                      ))}</tbody>
-                  </table></div>
-              </div>
+            <h3 className="text-xl font-bold">Data Explorer (Experimental)</h3>
+            <div className="bg-slate-800 p-4 rounded-lg space-y-3">
+                <textarea value={query} onChange={e => setQuery(e.target.value)} className="w-full h-24 bg-slate-900 border border-slate-600 rounded-md p-2 font-mono" />
+                <button onClick={handleRunQuery} className="bg-cyan-600 font-semibold px-4 py-2 rounded-md hover:bg-cyan-700">Run Query</button>
+                {queryError && <p className="text-red-400">{queryError}</p>}
+            </div>
+            <div className="bg-slate-800 p-4 rounded-lg">
+                <h4 className="font-bold mb-2">Query Results ({queryResult.length} rows)</h4>
+                <div className="overflow-auto max-h-96">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-700 sticky top-0">
+                            <tr>
+                                <th className="p-2 w-[25%]">Timestamp</th>
+                                <th className="p-2 w-[25%]">Source</th>
+                                <th className="p-2 w-[10%]">Line #</th>
+                                <th className="p-2 w-[40%]">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {queryResult.map((row, i) => (
+                                <tr key={i} className="border-b border-slate-700 hover:bg-slate-700/50">
+                                    <td className="p-2 whitespace-nowrap">{row.timestamp}</td>
+                                    <td className="p-2 truncate">{row.sourceFile}</td>
+                                    <td className="p-2">{row.lineNumber}</td>
+                                    <td className="p-2 truncate">{row.line}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 };
@@ -387,12 +389,12 @@ const ResultCard = ({ item, onAnalyze }) => {
     return (
         <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
             <header className="bg-slate-900/70 p-3 flex items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-4">
                     <span className={`font-mono text-red-400 text-lg`}>{item.key}</span>
                     <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">{item.type}</span>
                     {item.aiAnalysis?.severity && <span className={`px-2 py-0.5 text-xs rounded-full font-semibold text-white ${severityColor}`}>{item.aiAnalysis.severity}</span>}
                 </div>
-                <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="flex items-center gap-4">
                     <span className="font-bold text-xl">{item.contexts.length}</span>
                     <button className="p-1 hover:bg-slate-700 rounded-full">{isExpanded ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}</button>
                 </div>
@@ -400,9 +402,9 @@ const ResultCard = ({ item, onAnalyze }) => {
             {isExpanded && <div className="p-4 space-y-4">
                 {item.isAnalyzing ? (<div className="flex items-center gap-2 text-cyan-400"><BrainCircuit size={16} className="animate-pulse" /> Analyzing...</div>) 
                 : item.aiAnalysis ? (<>
-                    <div><h5 className="font-semibold text-cyan-400 mb-1">AI Description</h5><p className="text-slate-300 mb-3 text-sm">{item.aiAnalysis.description}</p></div>
-                    <div><h5 className="font-semibold text-cyan-400 mb-1">Potential Impact</h5><p className="text-slate-300 mb-3 text-sm">{item.aiAnalysis.impact}</p></div>
-                    <div><h5 className="font-semibold text-cyan-400 mb-1">Recommended Solutions</h5><ol className="list-decimal list-inside text-slate-300 space-y-2 text-sm">{item.aiAnalysis.solutions.map((s, i) => <li key={i}>{s}</li>)}</ol></div>
+                    <div><h5 className="font-semibold text-cyan-400 mb-1">AI Description</h5><p className="text-slate-300 mb-3">{item.aiAnalysis.description}</p></div>
+                    <div><h5 className="font-semibold text-cyan-400 mb-1">Potential Impact</h5><p className="text-slate-300 mb-3">{item.aiAnalysis.impact}</p></div>
+                    <div><h5 className="font-semibold text-cyan-400 mb-1">Recommended Solutions</h5><ol className="list-decimal list-inside text-slate-300 space-y-1">{item.aiAnalysis.solutions.map((s, i) => <li key={i}>{s}</li>)}</ol></div>
                 </>) : (
                     <button onClick={() => onAnalyze(item.key)} disabled={item.isAnalyzing} className="flex items-center gap-2 bg-cyan-600 px-3 py-2 rounded-md text-sm font-semibold hover:bg-cyan-700 disabled:bg-slate-600">
                         <BrainCircuit size={16}/> Get Detailed AI Analysis
@@ -417,7 +419,7 @@ const ResultCard = ({ item, onAnalyze }) => {
 
 const ResultsView = ({ results, onAnalyze, filter, setFilter }) => {
     const filteredResults = useMemo(() => Object.values(results).filter(item => item.key.toLowerCase().includes(filter.toLowerCase())).sort((a,b) => b.contexts.length - a.contexts.length), [results, filter]);
-    return (<div className="p-4"><div className="relative mb-4"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20}/><input type="text" placeholder="Filter errors..." value={filter} onChange={(e) => setFilter(e.target.value)} className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 pl-10 focus:ring-cyan-500 focus:border-cyan-500"/></div><div className="space-y-4">{filteredResults.length > 0 ? filteredResults.map(item => <ResultCard key={item.key} item={item} onAnalyze={onAnalyze}/>) : <div className="text-center p-10 text-slate-400">No results found.</div>}</div></div>);
+    return (<div className="p-4"><div className="relative mb-4"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20}/><input type="text" placeholder="Filter errors..." value={filter} onChange={(e) => setFilter(e.target.value)} className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 pl-10 focus:ring-cyan-500"/></div><div className="space-y-4">{filteredResults.length > 0 ? filteredResults.map(item => <ResultCard key={item.key} item={item} onAnalyze={onAnalyze}/>) : <div className="text-center p-10 text-slate-400">No results match.</div>}</div></div>);
 };
 
 
@@ -426,7 +428,7 @@ export default function App() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [apiConfig, setApiConfig] = useState({
         provider: 'gemini',
-        model: 'gemini-1.5-flash-latest',
+        model: 'gemini-2.0-flash',
         apiKey: '',
         customEndpoint: ''
     });
@@ -437,17 +439,20 @@ export default function App() {
     const [isBatchAnalyzing, setIsBatchAnalyzing] = useState(false);
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('');
-    const [libsLoaded, setLibsLoaded] = useState({ jszip: !!window.JSZip });
+    const [libsLoaded, setLibsLoaded] = useState({ jszip: false });
 
     useEffect(() => {
-        // This effect handles loading config from localStorage
+        const loadScript = (src, onLoad) => {
+            const script = document.createElement('script');
+            script.src = src; script.async = true; script.onload = onLoad;
+            document.body.appendChild(script);
+            return () => document.body.removeChild(script);
+        };
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', () => setLibsLoaded(p => ({...p, jszip: true})));
+        
         const savedConfig = localStorage.getItem('log-analyzer-apiconfig');
         if (savedConfig) {
-            try {
-                setApiConfig(JSON.parse(savedConfig));
-            } catch(e) {
-                console.error("Failed to parse saved API config", e);
-            }
+            setApiConfig(JSON.parse(savedConfig));
         }
     }, []);
 
@@ -457,52 +462,35 @@ export default function App() {
     
     const handleAnalyze = async () => {
         if (logFiles.length === 0) { setError('Please upload one or more log files first.'); return; }
-        if (!window.JSZip) { setError('Core library (JSZip) is not loaded. Please check your internet connection and refresh.'); return; }
-        
+        if (!libsLoaded.jszip) { setError('Core library is still loading, please wait a moment.'); return; }
         setError(''); setIsLoading(true); setResults({});
         let allResultsMap = new Map();
-        
         for (const file of logFiles) {
             let filesToProcess = [];
-            if (file.name.toLowerCase().endsWith('.zip')) {
+            if (file.name.endsWith('.zip')) {
                 try {
                     const zip = await window.JSZip.loadAsync(file);
-                    for (const fileName in zip.files) { 
-                        if (!zip.files[fileName].dir) {
-                            filesToProcess.push({ name: fileName, text: () => zip.files[fileName].async('string') });
-                        }
-                    }
+                    for (const fileName in zip.files) { if (!zip.files[fileName].dir) filesToProcess.push({ name: fileName, text: () => zip.files[fileName].async('string') }); }
                 } catch (e) { setError(`Failed to read ZIP: ${e.message}`); setIsLoading(false); return; }
             } else { filesToProcess.push(file); }
-
             for (const f of filesToProcess) {
                 try {
-                    const content = await f.text();
-                    const parsed = parseLogFile(content, f.name, []);
+                    const parsed = parseLogFile(await f.text(), f.name, []);
                     for (const [key, value] of Object.entries(parsed)) {
-                        if (allResultsMap.has(key)) {
-                             allResultsMap.get(key).contexts.push(...value.contexts);
-                        } else {
-                             allResultsMap.set(key, value);
-                        }
+                        if (allResultsMap.has(key)) allResultsMap.get(key).contexts.push(...value.contexts);
+                        else allResultsMap.set(key, value);
                     }
                 } catch (e) { setError(`Error processing ${f.name}: ${e.message}`); }
             }
         }
-        setResults(Object.fromEntries(allResultsMap)); 
-        setIsLoading(false); 
-        setActiveTab('results');
-        if (allResultsMap.size === 0) { 
-            setError("No potential errors found in the selected files."); 
-            setActiveTab('dashboard'); 
-        }
+        setResults(Object.fromEntries(allResultsMap)); setIsLoading(false); setActiveTab('results');
+        if (allResultsMap.size === 0) { setError("No potential errors found in the selected files."); setActiveTab('dashboard'); }
     };
     
     const handleAiAnalyze = useCallback(async (errorKey) => {
         const errorItem = results[errorKey];
         if (!errorItem || !apiConfig.apiKey) {
-            setError("API Key not set. Please set it via the sidebar button.");
-            setIsApiModalOpen(true);
+            setError("API Key not set.");
             return Promise.reject("API Key not set.");
         }
         
@@ -517,7 +505,19 @@ Format your response strictly as a JSON object with keys: "description", "impact
 - "description": (string) A detailed explanation of the error's root cause.
 - "impact": (string) Describe the likely impact on the system or application.
 - "severity": (string) Classify the severity as one of: "Critical", "High", "Medium", "Low".
-- "solutions": (array of strings) Provide a list of actionable, step-by-step solutions.`;
+- "solutions": (array of strings) Provide a list of actionable, step-by-step solutions.
+
+Example Response:
+{
+  "description": "The system denied access to a resource because the provided credentials have expired.",
+  "impact": "The user or service will be unable to access required resources, potentially halting workflows.",
+  "severity": "High",
+  "solutions": [
+    "Verify the expiration date of the user's password or service account credentials.",
+    "Renew or reissue the credentials through the appropriate admin portal.",
+    "Check system clock synchronization on both the client and server to rule out time drift."
+  ]
+}`;
         
         let endpoint = apiConfig.customEndpoint;
         let body;
@@ -542,10 +542,7 @@ Format your response strictly as a JSON object with keys: "description", "impact
 
         try {
             const response = await fetch(endpoint, { method: 'POST', headers, body });
-            if (!response.ok) {
-                const errorBody = await response.text();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-            }
+            if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
             
             const data = await response.json();
             let aiAnalysis;
@@ -566,7 +563,6 @@ Format your response strictly as a JSON object with keys: "description", "impact
         } catch (err) { 
             const failAnalysis = { description: `Analysis failed: ${err.message}`, impact: "N/A", severity: "Unknown", solutions: [] };
             setResults(prev => ({...prev, [errorKey]: {...prev[errorKey], aiAnalysis: failAnalysis, isAnalyzing: false}})); 
-            setError(`Analysis for '${errorKey}' failed.`);
             return Promise.reject(err.message);
         }
     }, [results, apiConfig]);
@@ -585,7 +581,7 @@ Format your response strictly as a JSON object with keys: "description", "impact
     };
 
 
-    const DashboardView = ({results, allContexts, fileCount}) => {
+    const DashboardView = ({results, allContexts}) => {
         const [isExportOpen, setIsExportOpen] = useState(false);
         const timelineData = useMemo(() => {
             const totalCountsByHour = {};
@@ -655,9 +651,9 @@ Format your response strictly as a JSON object with keys: "description", "impact
             }
             
             return (
-                <div className="bg-slate-800 p-4 rounded-lg h-96">
-                    <h4 className="font-bold mb-4 text-center">Error Timeline by Severity</h4>
-                    <ResponsiveContainer width="100%" height="90%">
+                <div className="bg-slate-800 p-4 rounded-lg h-80">
+                    <h4 className="font-bold mb-4">Error Timeline by Severity</h4>
+                    <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart data={timelineData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151"/>
                             <XAxis dataKey="time" tickFormatter={(t) => new Date(t).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} stroke="#94a3b8" tick={{fontSize: 12}}/>
@@ -676,17 +672,17 @@ Format your response strictly as a JSON object with keys: "description", "impact
         }
 
         return (<div className="p-4 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                  <StatCard title="Unique Errors" value={Object.keys(results).length} icon={AlertCircle} />
                  <StatCard title="Total Occurrences" value={allContexts.length} icon={Search}/>
-                 <StatCard title="Files Analyzed" value={fileCount} icon={FileText} />
+                 <StatCard title="Files Analyzed" value={logFiles.length} icon={FileText} />
                  <div className="relative bg-slate-800 p-4 rounded-lg flex items-center justify-center">
-                     <button onClick={() => setIsExportOpen(!isExportOpen)} className="bg-cyan-600 font-semibold px-4 py-2 rounded-md hover:bg-cyan-700 flex items-center gap-2"><FileDown/>Export</button>
-                     {isExportOpen && <div className="absolute top-full mt-2 right-0 bg-slate-700 rounded-md shadow-lg z-10 w-48">
-                         <button onClick={() => { triggerDownload(generateHtmlReport(results), `report_${getFormattedTimestamp()}.html`, 'text/html'); setIsExportOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-slate-600">as HTML Report</button>
-                         <button onClick={() => { triggerDownload(generateCsv(results), `report_${getFormattedTimestamp()}.csv`, 'text/csv'); setIsExportOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-slate-600">as CSV</button>
-                         <button onClick={() => { triggerDownload(JSON.stringify(results, null, 2), `report_${getFormattedTimestamp()}.json`, 'application/json'); setIsExportOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-slate-600">as JSON</button>
-                     </div>}
+                    <button onClick={() => setIsExportOpen(!isExportOpen)} className="bg-cyan-600 font-semibold px-4 py-2 rounded-md hover:bg-cyan-700 flex items-center gap-2"><FileDown/>Export</button>
+                    {isExportOpen && <div className="absolute top-full mt-2 right-0 bg-slate-700 rounded-md shadow-lg z-10 w-48">
+                        <button onClick={() => { const ts = getFormattedTimestamp(); triggerDownload(generateHtmlReport(results), `report_${ts}.html`, 'text/html'); setIsExportOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-slate-600">as HTML Report</button>
+                        <button onClick={() => { const ts = getFormattedTimestamp(); triggerDownload(generateCsv(results), `report_${ts}.csv`, 'text/csv'); setIsExportOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-slate-600">as CSV</button>
+                        <button onClick={() => { const ts = getFormattedTimestamp(); triggerDownload(JSON.stringify(results, null, 2), `report_${ts}.json`, 'application/json'); setIsExportOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-slate-600">as JSON</button>
+                    </div>}
                  </div>
             </div>
             {renderChart()}
@@ -697,7 +693,7 @@ Format your response strictly as a JSON object with keys: "description", "impact
         <ApiConfigModal isOpen={isApiModalOpen} onClose={() => setIsApiModalOpen(false)} apiConfig={apiConfig} setApiConfig={setApiConfig} />
         <Header />
         <div className="flex flex-grow" style={{height: 'calc(100vh - 72px)'}}>
-            <aside className="w-80 bg-slate-800/50 p-4 flex flex-col gap-6 border-r border-slate-700 overflow-y-auto">
+            <aside className="w-80 bg-slate-800/50 p-4 flex flex-col gap-6 border-r border-slate-700">
                 <div className="p-4 bg-slate-800 rounded-lg">
                     <h3 className="text-lg font-bold mb-4">Analysis Controls</h3>
                     <button onClick={() => setIsApiModalOpen(true)} className="w-full text-left mb-4 flex items-center gap-2 bg-slate-700 p-2 rounded-md hover:bg-slate-600">
@@ -708,8 +704,8 @@ Format your response strictly as a JSON object with keys: "description", "impact
                         </div>
                     </button>
                     <FileUploader onFileSelect={handleFileSelect} disabled={isLoading || isBatchAnalyzing} fileNames={logFiles} />
-                    <button onClick={handleAnalyze} disabled={isLoading || isBatchAnalyzing || logFiles.length === 0} className="w-full bg-cyan-600 font-bold py-3 px-4 rounded-md disabled:bg-slate-600/50 disabled:cursor-not-allowed">
-                        {isLoading ? 'Parsing Logs...' : 'Run Analysis'}
+                    <button onClick={handleAnalyze} disabled={isLoading || isBatchAnalyzing || logFiles.length === 0 || !libsLoaded.jszip} className="w-full bg-cyan-600 font-bold py-3 px-4 rounded-md disabled:bg-slate-600/50 disabled:cursor-not-allowed">
+                        {isLoading ? 'Parsing Logs...' : (!libsLoaded.jszip ? 'Loading Libs...' : 'Run Analysis')}
                     </button>
                     <button 
                         onClick={handleAnalyzeAll} 
@@ -723,14 +719,10 @@ Format your response strictly as a JSON object with keys: "description", "impact
                     <TabButton label="Analysis Results" icon={FileText} isActive={activeTab === 'results'} onClick={() => setActiveTab('results')} />
                     <TabButton label="Data Explorer" icon={Database} isActive={activeTab === 'explorer'} onClick={() => setActiveTab('explorer')} />
                 </div>
-                {error && <div className="mt-auto bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md text-sm flex items-start gap-2">
-                  <AlertCircle size={32} className="flex-shrink-0" /> 
-                  <span className="flex-grow">{error}</span>
-                  <X size={20} className="ml-auto cursor-pointer flex-shrink-0" onClick={() => setError('')}/>
-                  </div>}
+                 {error && <div className="mt-auto bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md text-sm flex items-center gap-2"><AlertCircle size={20}/> {error} <X size={20} className="ml-auto cursor-pointer" onClick={() => setError('')}/></div>}
             </aside>
             <main className="flex-grow bg-slate-900 overflow-y-auto">
-                {activeTab === 'dashboard' && <DashboardView results={results} allContexts={allContexts} fileCount={logFiles.length} />}
+                {activeTab === 'dashboard' && <DashboardView results={results} allContexts={allContexts} />}
                 {activeTab === 'results' && <ResultsView results={results} onAnalyze={handleAiAnalyze} filter={filter} setFilter={setFilter} />}
                 {activeTab === 'explorer' && <DataExplorerView allContexts={allContexts} />}
             </main>
