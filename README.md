@@ -7,9 +7,12 @@ An advanced, browser-based log analysis tool that uses the power of Large Langua
 **Author:** [Blindsinner](https://github.com/Blindsinner)
 
 ---
+---
+A live version of this project is hosted on GitHub Pages.
 
+**[➡️ AI-Powered-Log-Analyzer-Ultimate](https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate/)**
 ## ⚠️ Important: Personal Use Only
-
+---
 This tool is designed and intended **strictly for personal, non-commercial use**. 
 
 * **Privacy First:** All file processing and analysis happen directly in your web browser on your local machine. Your log files and API keys are **never** uploaded to any server.
