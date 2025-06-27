@@ -1,9 +1,19 @@
+// ✅ All imports at the very top
 import JSZip from 'jszip';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { FileText, Settings, LayoutDashboard, BrainCircuit, Search, AlertCircle, X, ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound, CheckCircle, BarChartHorizontal, Zap, Server } from 'lucide-react';
-import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Scatter, Legend } from 'recharts';
+import {
+  FileText, Settings, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
+  ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound,
+  CheckCircle, BarChartHorizontal, Zap, Server
+} from 'lucide-react';
+import {
+  ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  CartesianGrid, Scatter, Legend
+} from 'recharts';
 
+// ✅ Executable code AFTER imports
 window.JSZip = JSZip; // Expose to global scope for utils
+
 
 // --- Helper & Parsing Functions ---
 
