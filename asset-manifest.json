@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/AI-Powered-Log-Analyzer-Ultimate/static/css/main.dd6f667e.css",
+    "main.js": "/AI-Powered-Log-Analyzer-Ultimate/static/js/main.d6b5a2b9.js",
+    "index.html": "/AI-Powered-Log-Analyzer-Ultimate/index.html",
+    "main.dd6f667e.css.map": "/AI-Powered-Log-Analyzer-Ultimate/static/css/main.dd6f667e.css.map",
+    "main.d6b5a2b9.js.map": "/AI-Powered-Log-Analyzer-Ultimate/static/js/main.d6b5a2b9.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dd6f667e.css",
+    "static/js/main.d6b5a2b9.js"
+  ]
+}
