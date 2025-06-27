@@ -2,9 +2,9 @@
 import JSZip from 'jszip';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-  FileText, Settings, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
+  FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
   ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound,
-  CheckCircle, BarChartHorizontal, Zap, Server
+  Zap
 } from 'lucide-react';
 import {
   ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
