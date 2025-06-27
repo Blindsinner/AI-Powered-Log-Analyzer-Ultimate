@@ -1,6 +1,6 @@
 # AI-Powered Log Analyzer Ultimate
 
-![Log Analyzer Screenshot](https://placehold.co/800x400/1f2937/7dd3fc?text=Log+Analyzer+Ultimate)
+![Log Analyzer Screenshot](https://github.com/Blindsinner/AI-Powered-Log-Analyzer-Ultimate/blob/main/image.png)
 
 An advanced, browser-based log analysis tool that uses the power of Large Language Models (LLMs) like Google Gemini and OpenAI to automatically detect, classify, and provide solutions for errors found in log files. Created for system administrators, developers, and IT support professionals to dramatically speed up troubleshooting.
 
