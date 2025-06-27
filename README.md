@@ -139,4 +139,6 @@ If you'd like to contribute code:
 
 ## 📜 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the **GNU Affero General Public License v3.0**.
+
+In short, this means that if you modify this code and make it available to others over a network, you must also make the source code of your modified version available to them under the same license. For full details, it is recommended to include the full license text in a `LICENSE` file in the repository.
