@@ -14,7 +14,6 @@ import {
 // ✅ Executable code AFTER imports
 window.JSZip = JSZip; // Expose to global scope for utils
 
-
 // --- Helper & Parsing Functions ---
 
 const parseTimestamp = (line) => {
@@ -589,36 +588,51 @@ const TabButton = ({ icon: Icon, label, isActive, onClick }) => (
 
 const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
   const [tempConfig, setTempConfig] = useState(apiConfig);
-
-  useEffect(() => {
-    setTempConfig(apiConfig);
-  }, [isOpen, apiConfig]);
+  const [customModel, setCustomModel] = useState('');
 
   const providers = {
     gemini: {
       name: "Google Gemini",
-      models: ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'],
+      models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'],
       defaultEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
     },
     openai: {
       name: "OpenAI",
-      models: ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+      models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
       defaultEndpoint: 'https://api.openai.com/v1/chat/completions'
     },
     custom: {
       name: "Custom (Local/Other)",
-      models: ['custom'],
+      models: [],
       defaultEndpoint: 'http://127.0.0.1:11434/v1/chat/completions'
     }
   };
 
+  useEffect(() => {
+    setTempConfig(apiConfig);
+    const currentProviderModels = providers[apiConfig.provider]?.models || [];
+    if (apiConfig.provider !== 'custom' && !currentProviderModels.includes(apiConfig.model)) {
+      setCustomModel(apiConfig.model);
+      setTempConfig(prev => ({ ...prev, model: '--custom--' }));
+    } else {
+      setCustomModel('');
+    }
+  }, [isOpen, apiConfig]);
+
+
   const handleSave = () => {
-    setApiConfig(tempConfig);
-    localStorage.setItem('log-analyzer-apiconfig', JSON.stringify(tempConfig));
+    let finalConfig = { ...tempConfig };
+    if (tempConfig.model === '--custom--') {
+        finalConfig.model = customModel || 'custom-model'; // Use custom input or a default
+    }
+    setApiConfig(finalConfig);
+    localStorage.setItem('log-analyzer-apiconfig', JSON.stringify(finalConfig));
     onClose();
   };
 
   if (!isOpen) return null;
+  
+  const currentProviderModels = providers[tempConfig.provider]?.models || [];
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
@@ -629,24 +643,52 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
             <label className="block text-sm font-medium text-slate-300 mb-1">AI Provider</label>
             <select
               value={tempConfig.provider}
-              onChange={e => setTempConfig({ ...tempConfig, provider: e.target.value, model: providers[e.target.value].models[0] })}
+              onChange={e => setTempConfig({ ...tempConfig, provider: e.target.value, model: providers[e.target.value].models[0] || '', customEndpoint: providers[e.target.value].defaultEndpoint })}
               className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2"
             >
               {Object.keys(providers).map(p => <option key={p} value={p}>{providers[p].name}</option>)}
             </select>
           </div>
-          {tempConfig.provider !== 'custom' && (
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Model</label>
-              <select
-                value={tempConfig.model}
-                onChange={e => setTempConfig({ ...tempConfig, model: e.target.value })}
-                className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2"
-              >
-                {providers[tempConfig.provider].models.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
+          
+          {tempConfig.provider !== 'custom' ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Model</label>
+                <select
+                  value={tempConfig.model}
+                  onChange={(e) => setTempConfig({...tempConfig, model: e.target.value})}
+                  className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2"
+                >
+                  {currentProviderModels.map(m => <option key={m} value={m}>{m}</option>)}
+                  <option value="--custom--">Enter Custom Model...</option>
+                </select>
+              </div>
+              {tempConfig.model === '--custom--' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Custom Model Name</label>
+                  <input
+                    type="text"
+                    value={customModel}
+                    onChange={(e) => setCustomModel(e.target.value)}
+                    className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2 font-mono"
+                    placeholder="e.g., gemini-3.5-flash"
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+             <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Model Name (if applicable)</label>
+                <input
+                    type="text"
+                    value={tempConfig.model}
+                    onChange={e => setTempConfig({ ...tempConfig, model: e.target.value })}
+                    className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2 font-mono"
+                    placeholder="Enter model name"
+                />
             </div>
           )}
+
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">API Key</label>
             <input
@@ -654,13 +696,11 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
               value={tempConfig.apiKey}
               onChange={e => setTempConfig({ ...tempConfig, apiKey: e.target.value })}
               className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2"
-              placeholder="Enter your API Key (optional for some local models)"
+              placeholder="Enter your API Key (if required)"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              {tempConfig.provider === 'custom' ? 'Custom Endpoint' : 'Custom Endpoint (Optional)'}
-            </label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">API Endpoint URL</label>
             <input
               type="text"
               value={tempConfig.customEndpoint}
@@ -668,7 +708,9 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
               className="w-full bg-slate-700 text-white border border-slate-600 rounded-md p-2 font-mono"
               placeholder={providers[tempConfig.provider].defaultEndpoint}
             />
-            {tempConfig.provider === 'custom' && <p className="text-xs text-slate-400 mt-1">For local models like Ollama, use the OpenAI-compatible endpoint.</p>}
+            {tempConfig.provider === 'gemini' && 
+                <p className="text-xs text-slate-400 mt-1">The `&#123;model&#125;` placeholder will be replaced with the model name.</p>
+            }
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
@@ -852,8 +894,24 @@ export default function App() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
   const [inputFormat, setInputFormat] = useState('AUTO');
+  const [libsLoaded, setLibsLoaded] = useState(false);
 
   useEffect(() => {
+    const loadScript = (src, onLoad) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = onLoad;
+      document.body.appendChild(script);
+      return () => {
+        document.body.removeChild(script);
+      };
+    };
+
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', () => {
+      setLibsLoaded(true);
+    });
+
     const savedConfig = localStorage.getItem('log-analyzer-apiconfig');
     if (savedConfig) {
       setApiConfig(JSON.parse(savedConfig));
@@ -866,6 +924,7 @@ export default function App() {
 
   const handleAnalyze = async () => {
     if (logFiles.length === 0) { setError('Please upload one or more log files first.'); return; }
+    if (!libsLoaded || !window.JSZip) { setError('Core library is still loading, please wait a moment.'); return; }
     setError(''); setIsLoading(true); setResults({});
 
     let allLogEntries = [];
@@ -873,7 +932,7 @@ export default function App() {
       let filesToProcess = [];
       if (file.name.endsWith('.zip')) {
         try {
-          const zip = await JSZip.loadAsync(file);
+          const zip = await window.JSZip.loadAsync(file);
           for (const fileName in zip.files) {
             if (!zip.files[fileName].dir) {
               filesToProcess.push({ name: fileName, text: () => zip.files[fileName].async('string') });
@@ -944,27 +1003,26 @@ Example Response:
     let headers = { 'Content-Type': 'application/json' };
 
     if (apiConfig.provider === 'gemini') {
-      if (!endpoint) {
-        endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${apiConfig.model}:generateContent?key=${apiConfig.apiKey}`;
+      let finalEndpoint = endpoint.replace('{model}', apiConfig.model);
+      if (!endpoint.includes('{model}')) { // Fallback for old endpoint format
+        finalEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${apiConfig.model}:generateContent?key=${apiConfig.apiKey}`;
+      } else {
+        finalEndpoint += `?key=${apiConfig.apiKey}`;
       }
       body = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
+      endpoint = finalEndpoint;
     } else if (apiConfig.provider === 'openai' || apiConfig.provider === 'custom') {
-        // This block handles both OpenAI and Custom providers.
-        // For custom providers, we assume an OpenAI-compatible API.
-        if (apiConfig.provider === 'openai') {
-            if (!endpoint) endpoint = 'https://api.openai.com/v1/chat/completions';
-            headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
-        } else { // Custom provider
-            if (apiConfig.apiKey) headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
+        if (!endpoint) { // Default endpoint if not set
+           endpoint = (apiConfig.provider === 'openai') ? 'https://api.openai.com/v1/chat/completions' : 'http://127.0.0.1:11434/v1/chat/completions';
         }
+        if (apiConfig.apiKey) headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
         
         body = JSON.stringify({
             model: apiConfig.model,
             messages: [{ role: 'user', content: prompt }],
-            response_format: { type: "json_object" } // May not be supported by all models but good to have
+            response_format: { type: "json_object" } 
         });
     }
-
 
     try {
       const response = await fetch(endpoint, { method: 'POST', headers, body });
@@ -986,10 +1044,8 @@ Example Response:
       }
 
       try {
-          // Attempt to parse the whole string first
           aiAnalysis = JSON.parse(textToParse);
       } catch (e) {
-          // If that fails, find the JSON block within the string
           const jsonMatch = textToParse.match(/\{[\s\S]*\}/);
           if (!jsonMatch) throw new Error("Could not find a valid JSON object in the AI response.");
           aiAnalysis = JSON.parse(jsonMatch[0]);
