@@ -1,15 +1,18 @@
 // ✅ All imports at the very top
-import JSZip from 'https://esm.run/jszip';
+import JSZip from 'jszip';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
   ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound,
-  Zap, Menu
+  Zap, Menu, Providers
 } from 'lucide-react';
 import {
   ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Scatter, Legend
 } from 'recharts';
+
+// ✅ Executable code AFTER imports
+window.JSZip = JSZip; // Expose to global scope for utils
 
 // --- Helper & Parsing Functions ---
 
@@ -891,24 +894,8 @@ export default function App() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
   const [inputFormat, setInputFormat] = useState('AUTO');
-  const [libsLoaded, setLibsLoaded] = useState(false);
 
   useEffect(() => {
-    const loadScript = (src, onLoad) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = onLoad;
-      document.body.appendChild(script);
-      return () => {
-        document.body.removeChild(script);
-      };
-    };
-
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', () => {
-      setLibsLoaded(true);
-    });
-
     const savedConfig = localStorage.getItem('log-analyzer-apiconfig');
     if (savedConfig) {
       setApiConfig(JSON.parse(savedConfig));
@@ -921,7 +908,7 @@ export default function App() {
 
   const handleAnalyze = async () => {
     if (logFiles.length === 0) { setError('Please upload one or more log files first.'); return; }
-    if (!libsLoaded || !window.JSZip) { setError('Core library is still loading, please wait a moment.'); return; }
+    if (!window.JSZip) { setError('Core library is still loading, please wait a moment.'); return; }
     setError(''); setIsLoading(true); setResults({});
 
     let allLogEntries = [];
