@@ -1,5 +1,5 @@
 // ✅ All imports at the very top
-import JSZip from 'jszip';
+import JSZip from 'https://esm.run/jszip';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
@@ -10,9 +10,6 @@ import {
   ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Scatter, Legend
 } from 'recharts';
-
-// ✅ Executable code AFTER imports
-window.JSZip = JSZip; // Expose to global scope for utils
 
 // --- Helper & Parsing Functions ---
 
