@@ -1,6 +1,6 @@
 # AI-Powered Log Analyzer Ultimate
 
-An advanced, browser-based log analysis tool that uses the power of Large Language Models (LLMs) like Google Gemini and OpenAI to automatically detect, classify, and provide solutions for errors found in log files. Created for system administrators, developers, and IT support professionals to dramatically speed up troubleshooting.
+An advanced, browser-based log analysis tool that leverages Large Language Models (LLMs) like Google Gemini and OpenAI to automatically detect, classify, and provide actionable solutions for errors in log files. Designed for system administrators, developers, and IT support professionals to streamline troubleshooting and reduce diagnostic time.
 
 **Author:** [Blindsinner](https://github.com/Blindsinner)
 
@@ -10,9 +10,11 @@ An advanced, browser-based log analysis tool that uses the power of Large Langua
 
 ---
 
-## A live version of this project is hosted on GitHub Pages:
+## Live Demo
 
-## **Web Deployment:** [➡️AI-Powered-Log-Analyzer-Ultimate](https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate/)
+A live version of this project is hosted on GitHub Pages:
+
+**Web Deployment:** [➡️ AI-Powered Log Analyzer Ultimate](https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate/)
 
 ---
 
@@ -20,156 +22,161 @@ An advanced, browser-based log analysis tool that uses the power of Large Langua
 
 This tool is designed and intended **strictly for personal, non-commercial use**.
 
-* **Privacy First:** All file processing and analysis happen directly in your web browser on your local machine. Your log files and API keys are **never** uploaded to any server.
-* **No Business Use:** This application is not licensed for and should not be used for any business, commercial, or enterprise purposes.
+- **Privacy First:** All file processing and analysis occur in your web browser on your local machine. Log files and API keys are **never** uploaded to any server.
+- **No Business Use:** This application is not licensed for business, commercial, or enterprise purposes.
 
-The primary goal is to provide a powerful, private tool for individual developers and IT enthusiasts.
+The goal is to provide a powerful, privacy-focused tool for individual developers and IT enthusiasts.
 
 ---
 
 ## 🚀 Purpose
 
-The primary goal of this tool is to simplify and accelerate the often tedious process of sifting through log files. In complex systems, identifying the root cause of an issue can mean searching through thousands of lines across multiple files. This application automates that discovery process. It intelligently parses logs, groups similar errors together, and leverages modern AI to provide clear explanations, impact analysis, and actionable solutions. It effectively turns hours of diagnostic work into minutes, all while maintaining the strict privacy of a local-first application.
+The AI-Powered Log Analyzer Ultimate simplifies and accelerates the process of analyzing log files, which can be time-consuming in complex systems. It automates error detection, groups similar issues, and uses AI to deliver clear explanations, impact analysis, and step-by-step solutions. By running entirely in the browser, it ensures data privacy while transforming hours of diagnostic work into minutes.
 
 ---
 
 ## ✨ Features
 
-* **Multi-File & ZIP Upload:** Drag and drop multiple log files (`.log`, `.txt`, etc.) or a single `.zip` archive, which the tool will decompress and process in-browser.
-* **Input File Types**
+- **Multi-File & ZIP Upload**:
+  - Drag and drop multiple log files (e.g., `.log`, `.txt`) or a single `.zip` archive, which is decompressed in-browser using `JSZip`.
+- **Input File Types**:
   - **Explicit Extensions**: 29
     - `.log`, `.txt`, `.text`, `.out`, `.zip`, `.gz`, `.tar`, `.iis`, `.access`, `.nginx`, `.apache`, `.evtx`, `.etl`, `.csv`, `.xml`, `.json`, `.ini`, `.inf`, `.syslog`, `.auth`, `.dmesg`, `.messages`, `.md`, `.config`, `.yml`, `.yaml`, `.sql`, `.py`, `.js`, `.java`, `.cpp`, `.cs`, `.cap`
-    - **Comment**: Added `.cap` to the list of explicit extensions, as it is implied by the `NETMON` parser, which is intended for network capture files (e.g., Microsoft Network Monitor logs). The total count is updated to 29 to reflect this addition.
+    - **Comment**: The `.cap` extension is included for network capture files (e.g., Microsoft Network Monitor logs), supported by the `NETMON` parser.
   - **Parsing Formats**: 22
     - `AUTO`, `TEXTLINE`, `TEXTWORD`, `CSV`, `TSV`, `XML`, `W3C`, `IIS`, `NCSA`, `IISW3C`, `IISODBC`, `IISMSID`, `HTTPERR`, `URLSCAN`, `BIN`, `EVT`, `ETW`, `NETMON`, `REG`, `ADS`, `FS`, `COM`
-    - **Note**: 10 parsers (`IISODBC`, `IISMSID`, `URLSCAN`, `BIN`, `EVT`, `ETW`, `NETMON`, `ADS`, `FS`, `COM`) are unimplemented placeholders.
-    - **Comment on Unimplemented Parsers**: These 10 parsers remain unimplemented due to the complexity of their formats, which often involve specialized or binary structures (e.g., `.evtx` for Windows Event Logs, `.etl` for ETW traces). Proper parsing would require external libraries (e.g., `libevtx` for `.evtx`, `TraceEvent` for `.etl`) or custom decoding logic, which is not currently included. The application falls back to `TEXTLINE` parsing, treating these files as plain text, which may not capture their structured data accurately. Implementing these parsers is likely deferred due to development priorities or resource constraints.
-  - **Total Unique Extensions**: Approximately 29, including explicitly listed extensions and `.cap` implied by the `NETMON` parser.
+    - **Note**: 10 parsers (`IISODBC`, `IISMSID`, `URLSCAN`, `BIN`, `EVT`, `ETW`, `NETMON`, `ADS`, `FS`, `COM`) are placeholders and unimplemented. These fall back to `TEXTLINE` parsing, treating files as plain text.
+    - **Comment on Unimplemented Parsers**: These parsers are unimplemented due to the complexity of their formats, often involving binary or specialized structures (e.g., `.evtx` for Windows Event Logs, `.etl` for ETW traces, `.cap` for network captures). Proper parsing requires external libraries (e.g., `libevtx`, `TraceEvent`) or custom logic, which is not currently included. This may lead to data loss or misinterpretation for binary formats.
   - **Notes**:
-    - `.zip` files are extracted using JSZip, with contents parsed based on their extensions.
-    - Binary formats like `.evtx`, `.etl`, and `.cap` are read as text due to unimplemented parsers, potentially leading to data loss or misinterpretation.
-    - `.gz` and `.tar` are listed as supported but lack extraction logic, making their support incomplete.
-* **Export Formats**
+    - `.zip` files are extracted using `JSZip`, with contents parsed based on their extensions.
+    - `.gz` and `.tar` are listed as supported but lack extraction logic, limiting their usability.
+    - Binary formats (`.evtx`, `.etl`, `.cap`) are read as text, which may not capture structured data accurately.
+- **Export Formats**:
   - **Total**: 6
     - `HTML`, `CSV`, `TSV`, `XML`, `DATAGRID`, `CHART`
   - **File Extensions**:
     - `.html` (for `HTML`)
-    - `.csv` (for `CSV`, `DATAGRID`, and `CHART`)
+    - `.csv` (for `CSV`, `DATAGRID`, `CHART`)
     - `.tsv` (for `TSV`)
     - `.xml` (for `XML`)
   - **Notes**:
-    - `CSV` serves multiple export types:
+    - `CSV` serves multiple purposes:
       - `CSV`: Summarizes error keys, types, counts, and AI analysis.
       - `DATAGRID`: Exports detailed log entries for each error.
       - `CHART`: Provides timeline data for error occurrences by severity.
-    - All export formats are fully implemented, generating downloadable files with appropriate content types.
-* **Intelligent Error Parsing:** Automatically scans files for a wide range of common error keywords, status codes (like HRESULTs), and failure patterns.
-* **Advanced AI Analysis:**
-  - **Multi-Provider Support:** Seamlessly switch between Google Gemini and OpenAI, allowing you to use your preferred or most accessible models.
-  - **Model Selection:** Choose from popular models like `gemini-2.0-flash`, `gemini-2.5-pro`, `gpt-4o`, etc., to balance speed, cost, and analytical depth.
-  - **Custom Endpoint:** Configure a custom API endpoint URL for users running models through a proxy server or using a private, self-hosted LLM instance.
-* **Rich Visualization Dashboard:**
-  - **At-a-Glance Stats:** Key metrics on unique errors, total occurrences, and files analyzed provide an instant overview of your log data's health.
-  - **Interactive Timeline:** A professional chart plots total errors over time, with severity-colored dots (Critical, High, Medium, Low) for instant visual correlation.
-  - **Detailed Tooltips:** Hover over the chart to see a full breakdown of error severities at any point in time, helping you understand the error composition at a glance.
-* **Detailed Results View:**
-  - Errors are intelligently grouped and sorted by frequency, bringing the most common issues to the top.
-  - Expand each error group to view detailed, AI-generated descriptions, potential impact analysis, severity ratings, and step-by-step recommended solutions.
-  - Includes the original log line context for every error occurrence, allowing you to trace the issue back to its source.
-* **Data Explorer:** An experimental SQL-like query interface (`SELECT...WHERE...`) to perform custom, targeted searches on your log data for advanced investigation.
-* **Comprehensive Exporting:** Export your full analysis report in beautifully formatted **HTML**, data-rich **CSV**, or machine-readable **JSON** formats. Filenames are automatically timestamped for easy tracking.
-* **Secure & Private:** All file processing and API calls happen directly in your browser. Your data and API keys are never transmitted to or stored on any server. API keys are saved securely in your browser's local storage for your convenience only.
+    - All export formats are fully implemented with timestamped filenames.
+- **Intelligent Error Parsing**:
+  - Scans logs for keywords (e.g., `error`, `failed`, `timeout`) and patterns (e.g., hex codes, HRESULTs, HTTP status codes) using prioritized regex-based matching.
+  - Groups errors by key with context (line, timestamp, source file, line number).
+- **Advanced AI Analysis**:
+  - Supports multiple providers: Google Gemini, OpenAI, or custom (e.g., local Ollama).
+  - Model selection (e.g., `gemini-2.0-flash`, `gpt-4o`) for flexibility.
+  - Custom endpoint support for private or self-hosted LLMs.
+  - Generates the following for each error:
+    - **Description**: Detailed explanation of the error's root cause.
+    - **Impact**: Likely impact on the system or application.
+    - **Severity**: Classified as Critical, High, Medium, or Low.
+    - **Solutions**: Actionable, step-by-step recommendations.
+- **Rich Visualization Dashboard**:
+  - Displays stats: unique errors, total occurrences, and files analyzed.
+  - Interactive timeline chart (via `Recharts`) showing error counts over time, with severity-colored scatter points.
+  - Tooltips provide detailed severity breakdowns.
+- **Detailed Results View**:
+  - Groups errors by key, sorted by frequency.
+  - Expandable cards show AI-generated analysis and log contexts.
+  - Filterable via a search bar for quick error lookup.
+- **Data Explorer**:
+  - Experimental SQL-like query interface (e.g., `SELECT * FROM logs WHERE message contains 'denied'`) for custom log searches.
+- **Secure & Private**:
+  - All processing occurs in-browser; no data is sent to servers.
+  - API keys are stored in `localStorage` for convenience, never transmitted.
+- **Export Capabilities**:
+  - Generate reports in `HTML`, `CSV`, `TSV`, `XML`, `DATAGRID`, or `CHART` formats, with automatic timestamped filenames.
 
 ---
 
 ## ⚙️ How It Works
 
-This application is a modern single-page application (SPA) built with:
+This is a single-page application (SPA) built with:
 
-* **React:** For building a fast and interactive user interface.
-* **Tailwind CSS:** For professional and responsive styling.
-* **Lucide Icons:** For clean and modern iconography.
-* **Recharts:** For creating the rich, interactive timeline chart.
-* **JSZip:** For handling ZIP file decompression entirely within the browser.
+- **React**: For a fast, interactive UI.
+- **Tailwind CSS**: For responsive, professional styling.
+- **Lucide Icons**: For clean, modern icons.
+- **Recharts**: For interactive timeline charts.
+- **JSZip**: For in-browser ZIP decompression.
 
-All logic runs on the client-side (your browser), ensuring that your sensitive log data remains private.
+All logic runs client-side, ensuring data privacy.
 
 ### 🔍 How Errors Are Detected
 
-The application identifies errors in log files through a structured process involving file parsing and error detection, primarily handled by the `analyzeLogEntries` function. Here's how it works:
+The error detection process involves file parsing and analysis, primarily through the `analyzeLogEntries` function:
 
 1. **File Parsing**:
-   - Users upload log files via the `FileUploader` component, which supports multiple files (e.g., `.log`, `.txt`, `.zip`) and formats selected via a dropdown (`AUTO`, `CSV`, `XML`, etc.).
-   - The `handleAnalyze` function processes each file:
-     - **ZIP Files**: Extracted using `JSZip`, with each contained file processed individually.
-     - **Other Files**: Read as text using the `File.text()` API.
-   - A parser (e.g., `parseTextLine`, `parseCsv`, `parseHttpErr`) converts file content into log entries, each with:
-     - `timestamp`: A `Date` object (parsed using `parseTimestamp` or defaulting to the current date).
-     - `message`: The log line or extracted content (e.g., CSV column, HTTPERR reason).
-     - `lineNumber`: The line number in the file.
-     - `sourceFile`: The file name.
-   - Unimplemented parsers (e.g., `IISODBC`, `EVT`, `ETW`) fall back to `parseTextLine`, treating files as plain text.
+   - Users upload files via the `FileUploader` component, selecting a format (`AUTO`, `CSV`, `XML`, etc.) from a dropdown.
+   - The `handleAnalyze` function processes files:
+     - **ZIP Files**: Extracted using `JSZip`, with each file parsed based on its extension.
+     - **Other Files**: Read as text using `File.text()`.
+   - Parsers (e.g., `parseTextLine`, `parseCsv`, `parseHttpErr`, `parseReg`) convert content into log entries with:
+     - `timestamp`: Parsed via `parseTimestamp` or defaulting to the current date.
+     - `message`: Log line or extracted content (e.g., CSV column, HTTPERR reason).
+     - `lineNumber`: Line number in the file.
+     - `sourceFile`: File name.
+   - Unimplemented parsers (`IISODBC`, `IISMSID`, `URLSCAN`, `BIN`, `EVT`, `ETW`, `NETMON`, `ADS`, `FS`, `COM`) fall back to `TEXTLINE`, treating files as plain text.
 
 2. **Error Detection with `analyzeLogEntries`**:
-   - The function scans each log entry's `message` for errors using:
-     - **Keywords**: A predefined list (`error`, `failed`, `denied`, `timeout`, `exception`, `critical`, `fatal`, `unhandled`, `refused`, `access denied`, `connection_dropped`) matched via a case-insensitive regex.
-     - **Patterns**: Regular expressions for:
-       - Hex error codes (e.g., `0x80070005`).
-       - HRESULT codes (e.g., `HRESULT: 0x80070005`).
-       - Numeric error codes (e.g., `Error Code: 500`).
-       - Failure keywords (e.g., `fail`, `failure`).
-   - For each entry:
-     - If a pattern matches, the matched string (e.g., `0x80070005`) becomes the error key, with a type like `Hex Error Code`.
-     - If no pattern matches, it checks for keywords, using the matched keyword (e.g., `error`) as the key with type `Keyword Match`.
-     - Non-matching entries are skipped.
-   - Errors are grouped in a `Map` by key, with each entry containing:
-     - `key`: The error identifier (e.g., `error`, `0x80070005`).
-     - `type`: The match type (e.g., `Keyword Match`, `Hex Error Code`).
-     - `contexts`: An array of occurrences with `line`, `lineNumber`, `timestamp`, and `sourceFile`.
+   - Scans each log entry’s `message` using a prioritized list of patterns:
+     - **High-Priority Patterns**: Java/.NET exceptions, Oracle DB errors, hex codes, HRESULTs, HTTP status codes (400s, 500s), kernel errors.
+     - **Low-Priority Keywords**: `fatal`, `critical`, `error`, `exception`, `failed`, `denied`, `refused`, `timeout`, `unhandled`.
+   - Matches the highest-priority pattern first, using the captured string as the error key (e.g., `ORA-00942`, `error`).
+   - Groups errors in a `Map` by key, storing:
+     - `key`: Error identifier.
+     - `type`: Pattern name (e.g., `Java Exception`, `Keyword: error`).
+     - `category`: Error category (e.g., `Application Exception`, `General Error`).
+     - `contexts`: Array of occurrences (`line`, `lineNumber`, `timestamp`, `sourceFile`).
      - `aiAnalysis`: AI-generated details (added later).
      - `isAnalyzing`: Tracks AI analysis status.
+   - Non-matching entries are skipped.
 
 3. **Integration and Display**:
-   - Results are stored in the `results` state and displayed in the `ResultsView` as expandable cards, showing error keys, types, counts, and contexts.
-   - The `DashboardView` shows stats (unique errors, total occurrences) and a timeline chart using `Recharts`, plotting errors by severity over time.
-   - Users can trigger AI analysis (`handleAiAnalyze` or `handleAnalyzeAll`) to enrich errors with descriptions, impacts, severities, and solutions via an external API (e.g., Gemini, OpenAI).
-   - The `DataExplorerView` allows custom queries (e.g., `SELECT * FROM logs WHERE message contains 'denied'`) to filter log entries.
-   - Results can be exported in formats like `HTML`, `CSV`, `TSV`, `XML`, `DATAGRID`, and `CHART`, including error details and AI analysis.
+   - Results are stored in the `results` state and displayed in `ResultsView` as expandable cards with error details and AI analysis.
+   - `DashboardView` shows stats and a timeline chart, plotting errors by severity over time.
+   - `handleAiAnalyze` and `handleAnalyzeAll` fetch AI analysis from configured providers (Gemini, OpenAI, or custom), adding descriptions, impacts, severities, and solutions.
+   - `DataExplorerView` supports SQL-like queries for custom filtering.
+   - Exports are generated in multiple formats, including detailed `DATAGRID` (all log entries) and `CHART` (timeline data).
 
 4. **Limitations**:
-   - Unimplemented parsers may misinterpret binary files (e.g., `.evtx`, `.etl`).
-   - Error detection is limited to predefined keywords and patterns, potentially missing custom errors.
-   - Timestamp parsing may default to the current date if formats are unrecognized.
+   - Unimplemented parsers may misinterpret binary files (e.g., `.evtx`, `.etl`, `.cap`), leading to data loss.
+   - Error detection relies on predefined patterns and keywords, potentially missing custom or context-specific errors.
+   - Timestamp parsing may fail for unrecognized formats, defaulting to the current date.
+   - `.gz` and `.tar` files are not properly extracted due to missing decompression logic.
 
 ---
 
 ## 🛠️ Setup & Usage
 
-The repository has been modified for GitHub Pages deployment. Below are two scenarios:
-
 ### 1. Web Deployment (GitHub Pages)
 
-For quick access without cloning the repo:
+Access the app without local setup:
 
-1. Navigate to: `https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate/`
-2. Open **Settings** within the app and configure your API key.
-3. Drag-and-drop log files or `.zip` archives to start analysis.
+1. Visit: [https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate/](https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate/)
+2. Configure your API key in **Settings** (required for AI analysis).
+3. Drag and drop log files or `.zip` archives to start analysis.
 
-*No local installation required; runs entirely in your browser.*
+*No installation required; runs in-browser.*
 
 ### 2. Local Desktop Setup
 
-To run the app on your machine (e.g., offline or within a secure network), follow these steps:
+To run locally (e.g., offline or in a secure network):
 
 #### Prerequisites
 
-1. **Node.js (LTS):** Download and install from [https://nodejs.org/](https://nodejs.org/)
-2. **(Optional) Code Editor:** Visual Studio Code recommended.
+- **Node.js (LTS)**: Install from [https://nodejs.org/](https://nodejs.org/)
+- **(Optional) Code Editor**: Visual Studio Code recommended.
 
 #### Installation & Running
 
 ```bash
-# Clone this repository
+# Clone the repository
 git clone https://github.com/Blindsinner/AI-Powered-Log-Analyzer-Ultimate.git
 cd AI-Powered-Log-Analyzer-Ultimate
 
@@ -180,36 +187,40 @@ npm install
 npm start
 ```
 
-The app will open in your browser at `http://localhost:3000`.
+The app will open at `http://localhost:3000`.
 
-*To build a production bundle for custom hosting:*
+*To build for production:*
 
 ```bash
 npm run build
 ```
 
-You can then serve the contents of the `build/` directory using any static file server (e.g., `serve`, Nginx).
+Serve the `build/` directory using a static file server (e.g., `serve`, Nginx).
 
 ### 3. Custom Server Deployment
 
-To host on your own web server or custom domain, you’ll need to adjust a few settings:
+To host on your own server or domain:
 
-1. **Update the `homepage` field** in your `package.json` to point to your domain or subdirectory. For example:
+1. **Update `package.json`**:
+   Set the `homepage` field to your domain or subdirectory:
 
    ```json
    {
-     // …
      "homepage": "https://example.com/log-analyzer/"
-     // …
    }
    ```
-2. **Rebuild** the app:
+
+2. **Rebuild**:
 
    ```bash
    npm run build
    ```
-3. **Deploy** the contents of the `build/` folder to your server’s public directory. For example, copy them to `/var/www/html/log-analyzer/` or your hosting provider’s designated folder.
-4. **Configure routing** (if using client-side navigation): ensure your server redirects all requests to `index.html`. For Nginx, you might add:
+
+3. **Deploy**:
+   Copy the `build/` folder to your server’s public directory (e.g., `/var/www/html/log-analyzer/`).
+
+4. **Configure Routing**:
+   Ensure all requests redirect to `index.html` for client-side routing. For Nginx:
 
    ```nginx
    location /log-analyzer/ {
@@ -217,28 +228,27 @@ To host on your own web server or custom domain, you’ll need to adjust a few s
    }
    ```
 
-> **Note:** This repository is preconfigured for GitHub Pages (the `homepage` field points to `https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate`). If deploying elsewhere, update or remove the `homepage` setting accordingly.
+> **Note**: The repository is preconfigured for GitHub Pages (`homepage` set to `https://blindsinner.github.io/AI-Powered-Log-Analyzer-Ultimate`). Update or remove this field for custom deployments.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome and greatly appreciated! Follow these steps:
+Contributions are welcome! To contribute:
 
 1. **Fork** the repository.
-2. **Create a branch:** `git checkout -b feature/my-feature`
-3. **Implement your changes.**
-4. **Commit:** `git commit -m "Add my feature"`
-5. **Push:** `git push origin feature/my-feature`
+2. **Create a branch**: `git checkout -b feature/my-feature`
+3. **Implement changes**.
+4. **Commit**: `git commit -m "Add my feature"`
+5. **Push**: `git push origin feature/my-feature`
 6. **Open a Pull Request** with a clear description.
 
-For bug reports or feature requests, please visit the [Issues tab](https://github.com/Blindsinner/AI-Powered-Log-Analyzer-Ultimate/issues).
+Report bugs or request features via the [Issues tab](https://github.com/Blindsinner/AI-Powered-Log-Analyzer-Ultimate/issues).
 
 ---
 
 ## 📜 License
 
-This project is licensed under the **GNU Affero General Public License v3.0**.
+Licensed under the **GNU Affero General Public License v3.0**.
 
 If you modify this code and provide it over a network, you must release your modifications under the same license.
-```
