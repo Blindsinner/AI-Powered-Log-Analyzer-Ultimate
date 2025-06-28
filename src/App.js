@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
   ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound,
-  Zap
+  Zap, Menu
 } from 'lucide-react';
 import {
   ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -13,6 +13,8 @@ import {
 
 // ✅ Executable code AFTER imports
 window.JSZip = JSZip; // Expose to global scope for utils
+
+
 // --- Helper & Parsing Functions ---
 
 const parseTimestamp = (line) => {
@@ -565,13 +567,16 @@ const triggerDownload = (content, fileName, contentType) => {
 
 // --- UI Components ---
 
-const Header = () => (
+const Header = ({ onMenuClick }) => (
   <header className="bg-slate-900 text-white p-4 shadow-lg flex items-center justify-between z-20">
     <div className="flex items-center">
+      <button onClick={onMenuClick} className="mr-2 p-2 rounded-md lg:hidden hover:bg-slate-700">
+        <Menu className="w-6 h-6" />
+      </button>
       <TestTubeDiagonal className="w-8 h-8 mr-3 text-cyan-400" />
       <h1 className="text-xl font-bold">Log Analyzer Ultimate</h1>
     </div>
-    <span className="text-sm font-mono text-cyan-400">Enterprise Edition</span>
+    <span className="text-sm font-mono text-cyan-400 hidden sm:block">Enterprise Edition</span>
   </header>
 );
 
@@ -786,13 +791,13 @@ const ResultCard = ({ item, onAnalyze }) => {
 
   return (
     <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-      <header className="bg-slate-900/70 p-3 flex items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+      <header className="bg-slate-900/70 p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="flex items-center gap-4 flex-grow min-w-0">
           <span className={`font-mono text-red-400 text-lg truncate`}>{item.key}</span>
           <span className="text-xs bg-slate-700 px-2 py-1 rounded-full whitespace-nowrap">{item.type}</span>
           {item.aiAnalysis?.severity && <span className={`px-2 py-0.5 text-xs rounded-full font-semibold text-white ${severityColor}`}>{item.aiAnalysis.severity}</span>}
         </div>
-        <div className="flex items-center gap-4 pl-4 flex-shrink-0">
+        <div className="flex items-center gap-4 pl-0 sm:pl-4 flex-shrink-0 mt-2 sm:mt-0">
           <span className="font-bold text-xl">{item.contexts.length}</span>
           <button className="p-1 hover:bg-slate-700 rounded-full">{isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</button>
         </div>
@@ -839,6 +844,7 @@ export default function App() {
     customEndpoint: ''
   });
   const [isApiModalOpen, setIsApiModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [logFiles, setLogFiles] = useState([]);
   const [results, setResults] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -1108,8 +1114,8 @@ Example Response:
     };
 
     return (
-      <div className="p-4 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Unique Errors" value={Object.keys(results).length} icon={AlertCircle} />
           <StatCard title="Total Occurrences" value={allContexts.length} icon={Search} />
           <StatCard title="Files Analyzed" value={logFiles.length} icon={FileText} />
@@ -1135,9 +1141,18 @@ Example Response:
   return (
     <div className="h-screen bg-slate-900 text-white font-sans flex flex-col">
       <ApiConfigModal isOpen={isApiModalOpen} onClose={() => setIsApiModalOpen(false)} apiConfig={apiConfig} setApiConfig={setApiConfig} />
-      <Header />
+      <Header onMenuClick={() => setIsSidebarOpen(true)} />
       <div className="flex flex-grow overflow-hidden">
-        <aside className="w-80 flex-shrink-0 bg-slate-800/50 p-4 flex flex-col gap-6 border-r border-slate-700 overflow-y-auto">
+        {/* Mobile Sidebar Overlay */}
+        <div className={`fixed inset-0 bg-black/50 z-30 lg:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
+        
+        {/* Sidebar */}
+        <aside className={`fixed inset-y-0 left-0 w-80 bg-slate-800 p-4 flex flex-col gap-6 border-r border-slate-700 overflow-y-auto z-40 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:flex-shrink-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="flex justify-end lg:hidden">
+              <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-md hover:bg-slate-700">
+                  <X className="w-6 h-6" />
+              </button>
+          </div>
           <div className="p-4 bg-slate-800 rounded-lg">
             <h3 className="text-lg font-bold mb-4">Analysis Controls</h3>
             <button onClick={() => setIsApiModalOpen(true)} className="w-full text-left mb-4 flex items-center gap-2 bg-slate-700 p-2 rounded-md hover:bg-slate-600">
@@ -1166,13 +1181,13 @@ Example Response:
             </button>
           </div>
           <div className="flex flex-col gap-2">
-            <TabButton label="Dashboard" icon={LayoutDashboard} isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-            <TabButton label="Analysis Results" icon={FileText} isActive={activeTab === 'results'} onClick={() => setActiveTab('results')} />
-            <TabButton label="Data Explorer" icon={Database} isActive={activeTab === 'explorer'} onClick={() => setActiveTab('explorer')} />
+            <TabButton label="Dashboard" icon={LayoutDashboard} isActive={activeTab === 'dashboard'} onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }} />
+            <TabButton label="Analysis Results" icon={FileText} isActive={activeTab === 'results'} onClick={() => { setActiveTab('results'); setIsSidebarOpen(false); }} />
+            <TabButton label="Data Explorer" icon={Database} isActive={activeTab === 'explorer'} onClick={() => { setActiveTab('explorer'); setIsSidebarOpen(false); }} />
           </div>
           {error && <div className="mt-auto bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md text-sm flex items-center gap-2"><AlertCircle size={20} /> {error} <X size={20} className="ml-auto cursor-pointer" onClick={() => setError('')} /></div>}
         </aside>
-        <main className="flex-grow bg-slate-900 overflow-y-auto">
+        <main className="flex-grow bg-slate-900 overflow-y-auto min-w-0">
           {activeTab === 'dashboard' && <DashboardView results={results} allContexts={allContexts} setError={setError} />}
           {activeTab === 'results' && <ResultsView results={results} onAnalyze={handleAiAnalyze} filter={filter} setFilter={setFilter} />}
           {activeTab === 'explorer' && <DataExplorerView allContexts={allContexts} />}
