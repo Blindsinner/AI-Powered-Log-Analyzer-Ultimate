@@ -1,11 +1,13 @@
 // ✅ All imports at the very top
 import JSZip from 'jszip';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+
 import {
   FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
   ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound,
-  Zap, Menu, Providers
+  Zap, Menu // ✅ 'Providers' removed
 } from 'lucide-react';
+
 import {
   ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Scatter, Legend
@@ -13,7 +15,7 @@ import {
 
 // ✅ Executable code AFTER imports
 window.JSZip = JSZip; // Expose to global scope for utils
-// --- Helper & Parsing Functions ---
+
 
 // --- Helper & Parsing Functions ---
 
