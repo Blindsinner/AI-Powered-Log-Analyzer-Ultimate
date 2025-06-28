@@ -36,7 +36,31 @@ The primary goal of this tool is to simplify and accelerate the often tedious pr
 
 ## ✨ Features
 
-* **Multi-File & ZIP Upload:** Drag and drop multiple log files (`.log`, `.txt`, etc.) or a single `.zip` archive, which the tool will decompress and process in-browser. (More File support for input and output is comming soon)
+* **Multi-File & ZIP Upload:** Drag and drop multiple log files (`.log`, `.txt`, etc.) or a single `.zip` archive, which the tool will decompress and process in-browser.
+* ## Input File Types
+
+- **Explicit Extensions**: 28
+  - `.log`, `.txt`, `.text`, `.out`, `.zip`, `.gz`, `.tar`, `.iis`, `.access`, `.nginx`, `.apache`, `.evtx`, `.etl`, `.csv`, `.xml`, `.json`, `.ini`, `.inf`, `.syslog`, `.auth`, `.dmesg`, `.messages`, `.md`, `.config`, `.yml`, `.yaml`, `.sql`, `.py`, `.js`, `.java`, `.cpp`, `.cs`
+- **Parsing Formats**: 21
+  - `AUTO`, `TEXTLINE`, `TEXTWORD`, `CSV`, `TSV`, `XML`, `W3C`, `IIS`, `NCSA`, `IISW3C`, `IISODBC`, `IISMSID`, `HTTPERR`, `URLSCAN`, `BIN`, `EVT`, `ETW`, `NETMON`, `REG`, `ADS`, `FS`, `COM`
+  - **Note**: 12 parsers (`IISODBC`, `IISMSID`, `HTTPERR`, `URLSCAN`, `BIN`, `EVT`, `ETW`, `NETMON`, `REG`, `ADS`, `FS`, `COM`) are unimplemented placeholders.
+- **Total Unique Extensions**: Approximately 28, with potential for additional extensions (e.g., `.cap`) implied by parsers.
+- **Notes**:
+  - `.zip` files are extracted.
+  - Binary formats like `.evtx` and `.etl` are read as text.
+  - Some parsers are not fully implemented, limiting their practical support.
+
+## Export Formats
+
+- **Total**: 6
+  - `HTML`, `CSV`, `TSV`, `XML`, `DATAGRID`, `CHART`
+- **File Extensions**:
+  - `.html`
+  - `.csv` (used for `CSV`, `DATAGRID`, and `CHART`)
+  - `.tsv`
+  - `.xml`
+- **Notes**:
+  - `CSV` is used for multiple export types, but each serves a distinct purpose (summary, detailed log entries, or chart data).
 * **Intelligent Error Parsing:** Automatically scans files for a wide range of common error keywords, status codes (like HRESULTs), and failure patterns.
 * **Advanced AI Analysis:**
 
