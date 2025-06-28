@@ -15,6 +15,8 @@ import {
 window.JSZip = JSZip; // Expose to global scope for utils
 // --- Helper & Parsing Functions ---
 
+// --- Helper & Parsing Functions ---
+
 const parseTimestamp = (line) => {
   const timestampRegex = /(\d{4}[-/]\d{2}[-/]\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?Z?)?)/;
   const match = line.match(timestampRegex);
@@ -895,7 +897,23 @@ export default function App() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
   const [inputFormat, setInputFormat] = useState('AUTO');
+  const [libsLoaded, setLibsLoaded] = useState(!!window.JSZip);
 
+  useEffect(() => {
+    if (!window.JSZip) {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      script.async = true;
+      script.onload = () => {
+        setLibsLoaded(true);
+      };
+      document.body.appendChild(script);
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, []);
+  
   useEffect(() => {
     const savedConfig = localStorage.getItem('log-analyzer-apiconfig');
     if (savedConfig) {
@@ -909,7 +927,7 @@ export default function App() {
 
   const handleAnalyze = async () => {
     if (logFiles.length === 0) { setError('Please upload one or more log files first.'); return; }
-    if (!window.JSZip) { setError('Core library is still loading, please wait a moment.'); return; }
+    if (!libsLoaded) { setError('Core library is still loading, please wait a moment.'); return; }
     setError(''); setIsLoading(true); setResults({});
 
     let allLogEntries = [];
@@ -917,7 +935,7 @@ export default function App() {
       let filesToProcess = [];
       if (file.name.endsWith('.zip')) {
         try {
-          const zip = await JSZip.loadAsync(file);
+          const zip = await window.JSZip.loadAsync(file);
           for (const fileName in zip.files) {
             if (!zip.files[fileName].dir) {
               filesToProcess.push({ name: fileName, text: () => zip.files[fileName].async('string') });
@@ -1210,8 +1228,8 @@ Example Response:
               </select>
             </div>
             <FileUploader onFileSelect={handleFileSelect} disabled={isLoading || isBatchAnalyzing} fileNames={logFiles} />
-            <button onClick={handleAnalyze} disabled={isLoading || isBatchAnalyzing || logFiles.length === 0} className="w-full bg-cyan-600 font-bold py-3 px-4 rounded-md disabled:bg-slate-600/50 disabled:cursor-not-allowed">
-              {isLoading ? 'Parsing Logs...' : 'Run Analysis'}
+            <button onClick={handleAnalyze} disabled={isLoading || isBatchAnalyzing || logFiles.length === 0 || !libsLoaded} className="w-full bg-cyan-600 font-bold py-3 px-4 rounded-md disabled:bg-slate-600/50 disabled:cursor-not-allowed">
+              {isLoading ? 'Parsing Logs...' : (!libsLoaded ? 'Loading Libs...' : 'Run Analysis')}
             </button>
             <button
               onClick={handleAnalyzeAll}
