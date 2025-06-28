@@ -13,7 +13,6 @@ import {
 
 // ✅ Executable code AFTER imports
 window.JSZip = JSZip; // Expose to global scope for utils
-
 // --- Helper & Parsing Functions ---
 
 const parseTimestamp = (line) => {
@@ -590,7 +589,7 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
   const [tempConfig, setTempConfig] = useState(apiConfig);
   const [customModel, setCustomModel] = useState('');
 
-  const providers = {
+  const providers = useMemo(() => ({
     gemini: {
       name: "Google Gemini",
       models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'],
@@ -606,18 +605,20 @@ const ApiConfigModal = ({ isOpen, onClose, apiConfig, setApiConfig }) => {
       models: [],
       defaultEndpoint: 'http://127.0.0.1:11434/v1/chat/completions'
     }
-  };
+  }), []);
 
   useEffect(() => {
-    setTempConfig(apiConfig);
-    const currentProviderModels = providers[apiConfig.provider]?.models || [];
-    if (apiConfig.provider !== 'custom' && !currentProviderModels.includes(apiConfig.model)) {
-      setCustomModel(apiConfig.model);
-      setTempConfig(prev => ({ ...prev, model: '--custom--' }));
-    } else {
-      setCustomModel('');
+    if (isOpen) {
+      setTempConfig(apiConfig);
+      const currentProviderModels = providers[apiConfig.provider]?.models || [];
+      if (apiConfig.provider !== 'custom' && !currentProviderModels.includes(apiConfig.model)) {
+        setCustomModel(apiConfig.model);
+        setTempConfig(prev => ({ ...prev, model: '--custom--' }));
+      } else {
+        setCustomModel('');
+      }
     }
-  }, [isOpen, apiConfig]);
+  }, [isOpen, apiConfig, providers]);
 
 
   const handleSave = () => {
@@ -916,7 +917,7 @@ export default function App() {
       let filesToProcess = [];
       if (file.name.endsWith('.zip')) {
         try {
-          const zip = await window.JSZip.loadAsync(file);
+          const zip = await JSZip.loadAsync(file);
           for (const fileName in zip.files) {
             if (!zip.files[fileName].dir) {
               filesToProcess.push({ name: fileName, text: () => zip.files[fileName].async('string') });
