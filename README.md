@@ -36,7 +36,7 @@ The primary goal of this tool is to simplify and accelerate the often tedious pr
 
 ## ✨ Features
 
-* **Multi-File & ZIP Upload:** Drag and drop multiple log files (`.log`, `.txt`, etc.) or a single `.zip` archive, which the tool will decompress and process in-browser.
+* **Multi-File & ZIP Upload:** Drag and drop multiple log files (`.log`, `.txt`, etc.) or a single `.zip` archive, which the tool will decompress and process in-browser. (More File support for input and output is comming soon)
 * **Intelligent Error Parsing:** Automatically scans files for a wide range of common error keywords, status codes (like HRESULTs), and failure patterns.
 * **Advanced AI Analysis:**
 
