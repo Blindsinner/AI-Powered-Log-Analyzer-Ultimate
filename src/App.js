@@ -281,8 +281,8 @@ const analyzeLogEntries = (logEntries) => {
     // Higher priority numbers are matched first.
     const patterns = [
         // High-priority: Specific application exceptions
-        { name: 'Java Exception', regex: /(java\.[a-zA-Z\.]*Exception):?/, category: 'Application Exception', priority: 100 },
-        { name: '.NET Exception', regex: /System\.[a-zA-Z\.]*Exception:/, category: 'Application Exception', priority: 100 },
+        { name: 'Java Exception', regex: /(java\.[a-zA-Z.]*Exception):?/, category: 'Application Exception', priority: 100 },
+        { name: '.NET Exception', regex: /System\.[a-zA-Z.]*Exception:/, category: 'Application Exception', priority: 100 },
         { name: 'Oracle DB Error', regex: /(ORA-\d{5})/, category: 'Database Error', priority: 95 },
         
         // High-priority: Specific error codes
