@@ -268,53 +268,83 @@ function autoDetectParser(content, fileName) {
   }
 }
 
+/**
+ * Enhanced enterprise-grade log analysis function.
+ * Identifies errors based on a prioritized list of patterns and keywords.
+ * @param {Array<Object>} logEntries - Array of log entry objects.
+ * @returns {Object} - An object containing grouped errors.
+ */
 const analyzeLogEntries = (logEntries) => {
-  const errorMap = new Map();
-  const allKeywords = ["error", "failed", "denied", "timeout", "exception", "critical", "fatal", "unhandled", "refused", "access denied", "connection_dropped"];
-  const regexPatterns = {
-    '0x[a-fA-F0-9]{8}\\b': "Hex Error Code",
-    '\\bHRESULT\\s*[:=]?\\s*(0x[0-9A-Fa-f]+)\\b': "HRESULT",
-    '\\b[eE][rR]{2}[oO][rR]\\s*([cC][oO][dD][eE])?\\s*[:=]?\\s*([0-9]+)\\b': "Error Code",
-    '\\b[fF][aA][iI][lL]([eE][dD]|[uU][rR][eE])?\\b': "Failure Keyword",
-  };
-  const keywordRegex = new RegExp(`\\b(${allKeywords.join('|').replace(/_/g, ' ')})\\b`, 'i');
+    const errorMap = new Map();
 
-  logEntries.forEach((entry) => {
-    let foundKey = null, matchType = null;
-    for (const [pattern, type] of Object.entries(regexPatterns)) {
-      const match = entry.message.match(new RegExp(pattern, 'i'));
-      if (match) {
-        foundKey = match[0].trim();
-        matchType = type;
-        break;
-      }
-    }
-    if (!foundKey) {
-      const keywordMatch = entry.message.match(keywordRegex);
-      if (keywordMatch) {
-        foundKey = keywordMatch[0].toLowerCase();
-        matchType = 'Keyword Match';
-      }
-    }
+    // Define a structured set of patterns with priority and categorization.
+    // Higher priority numbers are matched first.
+    const patterns = [
+        // High-priority: Specific application exceptions
+        { name: 'Java Exception', regex: /(java\.[a-zA-Z\.]*Exception):?/, category: 'Application Exception', priority: 100 },
+        { name: '.NET Exception', regex: /System\.[a-zA-Z\.]*Exception:/, category: 'Application Exception', priority: 100 },
+        { name: 'Oracle DB Error', regex: /(ORA-\d{5})/, category: 'Database Error', priority: 95 },
+        
+        // High-priority: Specific error codes
+        { name: 'Hex Error Code', regex: /(0x[a-fA-F0-9]{8}\b)/, category: 'System Error', priority: 90 },
+        { name: 'HRESULT', regex: /(\bHRESULT\s*[:=]?\s*(0x[0-9A-Fa-f]+)\b)/, category: 'System Error', priority: 90 },
+        
+        // Medium-priority: Common service errors
+        { name: 'HTTP Client Error', regex: /" (4\d{2}) \d+/, category: 'HTTP Client Error', priority: 80 },
+        { name: 'HTTP Server Error', regex: /" (5\d{2}) \d+/, category: 'HTTP Server Error', priority: 85 },
+        { name: 'Kernel Error', regex: /kernel: \[.*?\] (.*)/, category: 'Kernel Error', priority: 70 },
+        
+        // Low-priority: General keywords
+        { name: 'Keyword: fatal', regex: /\b(fatal)\b/i, category: 'General Error', priority: 50 },
+        { name: 'Keyword: critical', regex: /\b(critical)\b/i, category: 'General Error', priority: 49 },
+        { name: 'Keyword: error', regex: /\b(error)\b/i, category: 'General Error', priority: 40 },
+        { name: 'Keyword: exception', regex: /\b(exception)\b/i, category: 'General Error', priority: 39 },
+        { name: 'Keyword: failed', regex: /\b(failed)\b/i, category: 'General Error', priority: 30 },
+        { name: 'Keyword: denied', regex: /\b(denied)\b/i, category: 'Security Warning', priority: 25 },
+        { name: 'Keyword: refused', regex: /\b(refused)\b/i, category: 'Connection Error', priority: 25 },
+        { name: 'Keyword: timeout', regex: /\b(timeout)\b/i, category: 'Connection Error', priority: 20 },
+        { name: 'Keyword: unhandled', regex: /\b(unhandled)\b/i, category: 'General Error', priority: 15 },
+    ];
 
-    if (foundKey) {
-      const context = { line: entry.message, lineNumber: entry.lineNumber, timestamp: entry.timestamp, sourceFile: entry.sourceFile };
-      if (errorMap.has(foundKey)) {
-        errorMap.get(foundKey).contexts.push(context);
-      } else {
-        errorMap.set(foundKey, {
-          key: foundKey,
-          type: matchType,
-          contexts: [context],
-          aiAnalysis: null,
-          isAnalyzing: false,
-        });
-      }
-    }
-  });
+    logEntries.forEach((entry) => {
+        let bestMatch = { priority: -1 };
 
-  return Object.fromEntries(errorMap);
+        // Find the highest-priority pattern that matches the log line.
+        for (const pattern of patterns) {
+            const match = entry.message.match(pattern.regex);
+            if (match && pattern.priority > bestMatch.priority) {
+                bestMatch = {
+                    key: match[1] || match[0], // Use the captured group if it exists, otherwise the full match.
+                    type: pattern.name,
+                    category: pattern.category,
+                    priority: pattern.priority,
+                };
+            }
+        }
+        
+        // If a match was found, add it to the error map.
+        if (bestMatch.priority > -1) {
+            const foundKey = bestMatch.key.trim();
+            const context = { line: entry.message, lineNumber: entry.lineNumber, timestamp: entry.timestamp, sourceFile: entry.sourceFile };
+
+            if (errorMap.has(foundKey)) {
+                errorMap.get(foundKey).contexts.push(context);
+            } else {
+                errorMap.set(foundKey, {
+                    key: foundKey,
+                    type: bestMatch.type,
+                    category: bestMatch.category, // Store category for potential future use in UI
+                    contexts: [context],
+                    aiAnalysis: null,
+                    isAnalyzing: false,
+                });
+            }
+        }
+    });
+
+    return Object.fromEntries(errorMap);
 };
+
 
 // --- Export Functions ---
 
@@ -757,12 +787,12 @@ const ResultCard = ({ item, onAnalyze }) => {
   return (
     <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
       <header className="bg-slate-900/70 p-3 flex items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="flex items-center gap-4">
-          <span className={`font-mono text-red-400 text-lg`}>{item.key}</span>
-          <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">{item.type}</span>
+        <div className="flex items-center gap-4 flex-grow min-w-0">
+          <span className={`font-mono text-red-400 text-lg truncate`}>{item.key}</span>
+          <span className="text-xs bg-slate-700 px-2 py-1 rounded-full whitespace-nowrap">{item.type}</span>
           {item.aiAnalysis?.severity && <span className={`px-2 py-0.5 text-xs rounded-full font-semibold text-white ${severityColor}`}>{item.aiAnalysis.severity}</span>}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 pl-4 flex-shrink-0">
           <span className="font-bold text-xl">{item.contexts.length}</span>
           <button className="p-1 hover:bg-slate-700 rounded-full">{isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</button>
         </div>
@@ -1107,7 +1137,7 @@ Example Response:
       <ApiConfigModal isOpen={isApiModalOpen} onClose={() => setIsApiModalOpen(false)} apiConfig={apiConfig} setApiConfig={setApiConfig} />
       <Header />
       <div className="flex flex-grow overflow-hidden">
-        <aside className="w-80 bg-slate-800/50 p-4 flex flex-col gap-6 border-r border-slate-700 overflow-y-auto">
+        <aside className="w-80 flex-shrink-0 bg-slate-800/50 p-4 flex flex-col gap-6 border-r border-slate-700 overflow-y-auto">
           <div className="p-4 bg-slate-800 rounded-lg">
             <h3 className="text-lg font-bold mb-4">Analysis Controls</h3>
             <button onClick={() => setIsApiModalOpen(true)} className="w-full text-left mb-4 flex items-center gap-2 bg-slate-700 p-2 rounded-md hover:bg-slate-600">
