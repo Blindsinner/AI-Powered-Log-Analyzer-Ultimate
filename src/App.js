@@ -284,7 +284,7 @@ const analyzeLogEntries = (logEntries) => {
     // Define a structured set of patterns with priority and categorization.
     // Higher priority numbers are matched first.
     const patterns = [
-        // ✅ NEW: High-priority for specific installation failures with App ID
+        // High-priority for specific installation failures with App ID
         {
             name: 'Installation Failure with AppID',
             regex: /(?:installation|install|configuration) (?:failed|failure).*?product code '(\{[\w-]{36,38}\})'.*?(?:error code|ExitCode) (\d+|0x[0-9a-fA-F]+)/i,
@@ -333,7 +333,7 @@ const analyzeLogEntries = (logEntries) => {
             const match = entry.message.match(pattern.regex);
             if (match && pattern.priority > bestMatch.priority) {
                 bestMatch = {
-                    // ✅ Use the keyGenerator if it exists for more descriptive error keys
+                    // Use the keyGenerator if it exists for more descriptive error keys
                     key: pattern.keyGenerator ? pattern.keyGenerator(match) : (match[1] || match[0]),
                     type: pattern.name,
                     category: pattern.category,
@@ -882,7 +882,7 @@ const ResultCard = ({ item, onAnalyze }) => {
   );
 };
 
-// ✅ NEW: Component to display the AI-generated summary
+// Component to display the AI-generated summary
 const AnalysisSummary = ({ summary, isLoading }) => {
     if (isLoading) {
         return (
@@ -908,7 +908,6 @@ const ResultsView = ({ results, onAnalyze, filter, setFilter, analysisSummary, i
   const filteredResults = useMemo(() => Object.values(results).filter(item => item.key.toLowerCase().includes(filter.toLowerCase())).sort((a, b) => b.contexts.length - a.contexts.length), [results, filter]);
   return (
     <div className="p-4">
-      {/* ✅ ADDED: Display the summary component */}
       <AnalysisSummary summary={analysisSummary} isLoading={isSummaryLoading} />
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -940,7 +939,7 @@ export default function App() {
   const [filter, setFilter] = useState('');
   const [inputFormat, setInputFormat] = useState('AUTO');
   const [libsLoaded, setLibsLoaded] = useState(!!window.JSZip);
-  // ✅ NEW: State for AI summary
+  // State for AI summary
   const [analysisSummary, setAnalysisSummary] = useState(null);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
@@ -951,7 +950,6 @@ export default function App() {
       script.async = true;
       script.onload = () => {
         setLibsLoaded(true);
-        window.JSZip = window.JSZip;
       };
       document.body.appendChild(script);
       return () => {
