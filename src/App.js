@@ -5,7 +5,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   FileText, LayoutDashboard, BrainCircuit, Search, AlertCircle, X,
   ChevronDown, ChevronUp, Database, FileDown, TestTubeDiagonal, KeyRound,
-  Zap, Menu
+  Zap, Menu // ✅ 'Providers' removed
 } from 'lucide-react';
 
 import {
@@ -284,21 +284,6 @@ const analyzeLogEntries = (logEntries) => {
     // Define a structured set of patterns with priority and categorization.
     // Higher priority numbers are matched first.
     const patterns = [
-        // ✅ NEW: High-priority for specific installation failures with App ID
-        {
-            name: 'Installation Failure with AppID',
-            regex: /(?:installation|install|configuration) (?:failed|failure).*?product code '(\{[\w-]{36,38}\})'.*?(?:error code|ExitCode) (\d+|0x[0-9a-fA-F]+)/i,
-            keyGenerator: (match) => `Install Error ${match[2]} for AppID: ${match[1]}`,
-            category: 'Installation Error',
-            priority: 110
-        },
-        {
-            name: 'Exit Code with AppID',
-            regex: /(?:Exit Code|ExitCode) (\d+|0x[0-9a-fA-F]+).*?product code (\{[\w-]{36,38}\})/i,
-            keyGenerator: (match) => `Exit Code ${match[1]} for AppID: ${match[2]}`,
-            category: 'Installation Error',
-            priority: 105
-        },
         // High-priority: Specific application exceptions
         { name: 'Java Exception', regex: /(java\.[a-zA-Z.]*Exception):?/, category: 'Application Exception', priority: 100 },
         { name: '.NET Exception', regex: /System\.[a-zA-Z.]*Exception:/, category: 'Application Exception', priority: 100 },
@@ -333,8 +318,7 @@ const analyzeLogEntries = (logEntries) => {
             const match = entry.message.match(pattern.regex);
             if (match && pattern.priority > bestMatch.priority) {
                 bestMatch = {
-                    // ✅ Use the keyGenerator if it exists for more descriptive error keys
-                    key: pattern.keyGenerator ? pattern.keyGenerator(match) : (match[1] || match[0]),
+                    key: match[1] || match[0], // Use the captured group if it exists, otherwise the full match.
                     type: pattern.name,
                     category: pattern.category,
                     priority: pattern.priority,
@@ -882,34 +866,10 @@ const ResultCard = ({ item, onAnalyze }) => {
   );
 };
 
-// ✅ NEW: Component to display the AI-generated summary
-const AnalysisSummary = ({ summary, isLoading }) => {
-    if (isLoading) {
-        return (
-            <div className="p-4 mb-4 bg-slate-800 rounded-lg border border-slate-700">
-                <h3 className="text-lg font-bold text-cyan-400 mb-2 flex items-center gap-2"><BrainCircuit className="animate-spin" /> Generating AI Summary...</h3>
-                <div className="h-16 w-full bg-slate-700 animate-pulse rounded-md"></div>
-            </div>
-        )
-    }
-
-    if (!summary) return null;
-
-    return (
-        <div className="p-4 mb-4 bg-slate-800 rounded-lg border border-cyan-500/50">
-            <h3 className="text-lg font-bold text-cyan-400 mb-2">AI-Generated Summary</h3>
-            <p className="text-slate-300">{summary}</p>
-        </div>
-    )
-}
-
-
-const ResultsView = ({ results, onAnalyze, filter, setFilter, analysisSummary, isSummaryLoading }) => {
+const ResultsView = ({ results, onAnalyze, filter, setFilter }) => {
   const filteredResults = useMemo(() => Object.values(results).filter(item => item.key.toLowerCase().includes(filter.toLowerCase())).sort((a, b) => b.contexts.length - a.contexts.length), [results, filter]);
   return (
     <div className="p-4">
-      {/* ✅ ADDED: Display the summary component */}
-      <AnalysisSummary summary={analysisSummary} isLoading={isSummaryLoading} />
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
         <input type="text" placeholder="Filter errors..." value={filter} onChange={(e) => setFilter(e.target.value)} className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 pl-10 focus:ring-cyan-500" />
@@ -940,9 +900,6 @@ export default function App() {
   const [filter, setFilter] = useState('');
   const [inputFormat, setInputFormat] = useState('AUTO');
   const [libsLoaded, setLibsLoaded] = useState(!!window.JSZip);
-  // ✅ NEW: State for AI summary
-  const [analysisSummary, setAnalysisSummary] = useState(null);
-  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
   useEffect(() => {
     if (!window.JSZip) {
@@ -951,7 +908,6 @@ export default function App() {
       script.async = true;
       script.onload = () => {
         setLibsLoaded(true);
-        // ✅ FIXED: Removed redundant self-assignment: window.JSZip = window.JSZip;
       };
       document.body.appendChild(script);
       return () => {
@@ -969,12 +925,12 @@ export default function App() {
 
   const allContexts = useMemo(() => Object.values(results).flatMap(error => error.contexts), [results]);
 
-  const handleFileSelect = (files) => { setLogFiles(files); setResults({}); setError(''); setAnalysisSummary(null); };
+  const handleFileSelect = (files) => { setLogFiles(files); setResults({}); setError(''); };
 
   const handleAnalyze = async () => {
     if (logFiles.length === 0) { setError('Please upload one or more log files first.'); return; }
     if (!libsLoaded) { setError('Core library is still loading, please wait a moment.'); return; }
-    setError(''); setIsLoading(true); setResults({}); setAnalysisSummary(null);
+    setError(''); setIsLoading(true); setResults({});
 
     let allLogEntries = [];
     for (const file of logFiles) {
@@ -1007,59 +963,6 @@ export default function App() {
       setActiveTab('dashboard');
     }
   };
-  
-  const handleApiCall = useCallback(async (prompt, model, apiKey, provider, customEndpoint) => {
-    let endpoint = customEndpoint;
-    let body;
-    let headers = { 'Content-Type': 'application/json' };
-
-    if (provider === 'gemini') {
-        let finalEndpoint = endpoint.replace('{model}', model);
-        if (!endpoint.includes('{model}')) {
-            finalEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        } else {
-            finalEndpoint += `?key=${apiKey}`;
-        }
-        body = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
-        endpoint = finalEndpoint;
-    } else if (provider === 'openai' || provider === 'custom') {
-        if (!endpoint) {
-            endpoint = (provider === 'openai') ? 'https://api.openai.com/v1/chat/completions' : 'http://127.0.0.1:11434/v1/chat/completions';
-        }
-        if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
-        
-        body = JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: "json_object" } 
-        });
-    }
-
-    const response = await fetch(endpoint, { method: 'POST', headers, body });
-    if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-    }
-
-    const data = await response.json();
-    let textToParse;
-
-    if (provider === 'gemini') {
-        textToParse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!textToParse) throw new Error("Invalid Gemini response structure.");
-    } else { // openai or custom
-        textToParse = data?.choices?.[0]?.message?.content;
-        if (!textToParse) throw new Error("Invalid OpenAI/Custom response structure.");
-    }
-
-    try {
-        return JSON.parse(textToParse);
-    } catch (e) {
-        const jsonMatch = textToParse.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("Could not find a valid JSON object in the AI response.");
-        return JSON.parse(jsonMatch[0]);
-    }
- }, []);
 
   const handleAiAnalyze = useCallback(async (errorKey) => {
     const errorItem = results[errorKey];
@@ -1100,8 +1003,59 @@ Example Response:
   ]
 }`;
 
+    let endpoint = apiConfig.customEndpoint;
+    let body;
+    let headers = { 'Content-Type': 'application/json' };
+
+    if (apiConfig.provider === 'gemini') {
+      let finalEndpoint = endpoint.replace('{model}', apiConfig.model);
+      if (!endpoint.includes('{model}')) { // Fallback for old endpoint format
+        finalEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${apiConfig.model}:generateContent?key=${apiConfig.apiKey}`;
+      } else {
+        finalEndpoint += `?key=${apiConfig.apiKey}`;
+      }
+      body = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
+      endpoint = finalEndpoint;
+    } else if (apiConfig.provider === 'openai' || apiConfig.provider === 'custom') {
+        if (!endpoint) { // Default endpoint if not set
+           endpoint = (apiConfig.provider === 'openai') ? 'https://api.openai.com/v1/chat/completions' : 'http://127.0.0.1:11434/v1/chat/completions';
+        }
+        if (apiConfig.apiKey) headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
+        
+        body = JSON.stringify({
+            model: apiConfig.model,
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: "json_object" } 
+        });
+    }
+
     try {
-      const aiAnalysis = await handleApiCall(prompt, apiConfig.model, apiConfig.apiKey, apiConfig.provider, apiConfig.customEndpoint);
+      const response = await fetch(endpoint, { method: 'POST', headers, body });
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+      }
+
+      const data = await response.json();
+      let aiAnalysis;
+      let textToParse;
+
+      if (apiConfig.provider === 'gemini') {
+        textToParse = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!textToParse) throw new Error("Invalid Gemini response structure.");
+      } else { // openai or custom
+        textToParse = data?.choices?.[0]?.message?.content;
+        if (!textToParse) throw new Error("Invalid OpenAI/Custom response structure.");
+      }
+
+      try {
+          aiAnalysis = JSON.parse(textToParse);
+      } catch (e) {
+          const jsonMatch = textToParse.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) throw new Error("Could not find a valid JSON object in the AI response.");
+          aiAnalysis = JSON.parse(jsonMatch[0]);
+      }
+
       setResults(prev => ({ ...prev, [errorKey]: { ...prev[errorKey], aiAnalysis, isAnalyzing: false } }));
       return Promise.resolve();
     } catch (err) {
@@ -1109,57 +1063,7 @@ Example Response:
       setResults(prev => ({ ...prev, [errorKey]: { ...prev[errorKey], aiAnalysis: failAnalysis, isAnalyzing: false } }));
       return Promise.reject(err.message);
     }
-  }, [results, apiConfig, handleApiCall]);
-
- const handleGenerateAiSummary = useCallback(async () => {
-    const analyzedItems = Object.values(results).filter(r => r.aiAnalysis && r.aiAnalysis.severity !== 'Unknown');
-    if (analyzedItems.length < 2) return;
-
-    setIsSummaryLoading(true);
-
-    const errorSummaries = analyzedItems.map(item => ({
-        error: item.key,
-        severity: item.aiAnalysis.severity,
-        description: item.aiAnalysis.description
-    }));
-
-    const prompt = `You are a senior systems analyst. Based on the following list of identified errors, generate a high-level executive summary. The summary should identify the most critical issues, potential systemic problems, and a general assessment of the system's health.
-
-    Identified Errors:
-    ${JSON.stringify(errorSummaries.slice(0, 10), null, 2)} 
-
-    Format your response strictly as a JSON object with a single key: "summary".
-    - "summary": (string) A concise, well-written paragraph summarizing the overall situation.
-
-    Example Response:
-    {
-      "summary": "The system is experiencing critical instability, primarily driven by recurrent database connection timeouts (ORA-12170) and multiple application installation failures. These issues suggest a potential network infrastructure problem or misconfiguration of the database listeners. Immediate attention should be given to resolving the network and database connectivity to prevent a full-scale service outage."
-    }`;
-
-    try {
-        const responseJson = await handleApiCall(prompt, apiConfig.model, apiConfig.apiKey, apiConfig.provider, apiConfig.customEndpoint);
-        if (responseJson.summary) {
-            setAnalysisSummary(responseJson.summary);
-        }
-    } catch (err) {
-        console.error("Failed to generate AI summary:", err);
-        // Do not set an error in the main UI for this, just log it.
-    } finally {
-        setIsSummaryLoading(false);
-    }
-}, [results, apiConfig, handleApiCall]);
-
-  const analyzedItemsCount = useMemo(() => {
-    return Object.values(results).filter(r => r.aiAnalysis && r.aiAnalysis.severity !== 'Unknown').length;
-  }, [results]);
-
-  useEffect(() => {
-    const shouldGenerateSummary = analyzedItemsCount > 1 && !analysisSummary && !isSummaryLoading;
-    if (shouldGenerateSummary) {
-      handleGenerateAiSummary();
-    }
-  }, [analyzedItemsCount, analysisSummary, isSummaryLoading, handleGenerateAiSummary]);
-
+  }, [results, apiConfig]);
 
   const handleAnalyzeAll = async () => {
     if ((!apiConfig.apiKey && apiConfig.provider !== 'custom') || (apiConfig.provider === 'custom' && !apiConfig.customEndpoint)) { 
@@ -1176,7 +1080,6 @@ Example Response:
 
     await Promise.allSettled(promises);
     setIsBatchAnalyzing(false);
-    // The useEffect hook will now automatically trigger the summary generation
   };
 
   const DashboardView = ({ results, allContexts, setError }) => {
@@ -1347,7 +1250,7 @@ Example Response:
         </aside>
         <main className="flex-grow bg-slate-900 overflow-y-auto min-w-0">
           {activeTab === 'dashboard' && <DashboardView results={results} allContexts={allContexts} setError={setError} />}
-          {activeTab === 'results' && <ResultsView results={results} onAnalyze={handleAiAnalyze} filter={filter} setFilter={setFilter} analysisSummary={analysisSummary} isSummaryLoading={isSummaryLoading} />}
+          {activeTab === 'results' && <ResultsView results={results} onAnalyze={handleAiAnalyze} filter={filter} setFilter={setFilter} />}
           {activeTab === 'explorer' && <DataExplorerView allContexts={allContexts} />}
         </main>
       </div>
