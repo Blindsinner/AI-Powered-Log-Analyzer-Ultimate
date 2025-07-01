@@ -951,7 +951,7 @@ export default function App() {
       script.async = true;
       script.onload = () => {
         setLibsLoaded(true);
-        window.JSZip = window.JSZip;
+        // ✅ FIXED: Removed redundant self-assignment: window.JSZip = window.JSZip;
       };
       document.body.appendChild(script);
       return () => {
